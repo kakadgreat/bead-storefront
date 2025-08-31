@@ -241,7 +241,7 @@
     }
 
     (async function init() {
-      $("#year").textContent = new Date().getFullYear();
+      document.getElementById("year").textContent = new Date().getFullYear();
       try {
         const raw = await loadInventory();
         const items = raw.map(normalizeRow);
@@ -253,15 +253,15 @@
         // Catalog
         let current = items.slice();
         hydrateCatalog(applySearchAndSort(current));
-        $("#searchInput").addEventListener("input", ()=> hydrateCatalog(applySearchAndSort(current)));
-        $("#sortSelect").addEventListener("change", ()=> hydrateCatalog(applySearchAndSort(current)));
-        $("#shuffleFeatured").addEventListener("click", ()=> {
+        document.getElementById("searchInput").addEventListener("input", ()=> hydrateCatalog(applySearchAndSort(current)));
+        document.getElementById("sortSelect").addEventListener("change", ()=> hydrateCatalog(applySearchAndSort(current)));
+        document.getElementById("shuffleFeatured").addEventListener("click", ()=> {
           featured.sort(()=> Math.random() - 0.5);
           hydrateFeatured(featured);
         });
       } catch (err) {
         console.error(err);
-        $("#featuredGrid").innerHTML = `<div class='text-slate-600'>Could not load inventory. Check your published CSV link.</div>`;
+        document.getElementById("featuredGrid").innerHTML = `<div class='text-slate-600'>Could not load inventory. Check your published CSV link.</div>`;
       }
     })();
   </script>
