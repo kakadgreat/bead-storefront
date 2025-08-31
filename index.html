@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Canton Bead Shop – Beads for Sale</title>
+  <meta name="description" content="Hand‑picked beads, ready to ship. Get a quick quote or ask about bulk pricing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PapaParse for CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    :root { --ring: 0 0% 9%; }
+    html, body { height: 100%; }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+  <!-- NAV -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
+      <nav class="hidden sm:flex items-center gap-6 text-sm">
+        <a href="#featured" class="hover:text-sky-700">Featured</a>
+        <a href="#catalog" class="hover:text-sky-700">Catalog</a>
+        <a href="#quote" class="hover:text-sky-700">Get a Quote</a>
+      </nav>
+      <a href="#quote" class="inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">Request Quote</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">Beautiful beads, curated and ready to ship</h1>
+        <p class="mt-4 text-lg text-slate-600">Natural stones, glass, pearls, and more. Browse the catalog or ask for a quick quote—wholesale and custom stringing available.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="#featured" class="inline-flex items-center rounded-2xl bg-sky-600 px-5 py-3 text-white font-semibold shadow-soft hover:bg-sky-700">Shop Featured</a>
+          <a href="#catalog" class="inline-flex items-center rounded-2xl border border-slate-300 px-5 py-3 font-semibold hover:bg-slate-50">Browse All</a>
+        </div>
+        <dl class="mt-8 grid grid-cols-3 gap-6 text-sm text-slate-600">
+          <div><dt class="font-semibold text-slate-900">Fast picks</dt><dd>Top 12 likely to sell</dd></div>
+          <div><dt class="font-semibold text-slate-900">Updated from Sheet</dt><dd>Live inventory</dd></div>
+          <div><dt class="font-semibold text-slate-900">Quote in minutes</dt><dd>Netlify form</dd></div>
+        </dl>
+      </div>
+      <div class="relative">
+        <img alt="Assorted gemstone beads" class="w-full rounded-3xl shadow-soft" src="https://source.unsplash.com/1200x900/?gemstone,beads" />
+        <div class="absolute -bottom-6 -right-6 bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-soft hidden md:block">
+          <p class="text-sm"><span class="font-semibold">Live:</span> pulls from Google Sheet CSV → features best‑sellers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED -->
+  <section id="featured" class="border-t border-slate-200 bg-slate-50/60">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Featured (fast movers)</h2>
+          <p class="text-slate-600 mt-1">Picked automatically from your inventory—stone popularity, price band, and stock.</p>
+        </div>
+        <button id="shuffleFeatured" class="text-sm font-medium border border-slate-300 rounded-xl px-3 py-1.5 hover:bg-white">Shuffle</button>
+      </div>
+      <div id="featuredGrid" class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    </div>
+  </section>
+
+  <!-- CATALOG -->
+  <section id="catalog" class="border-t border-slate-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <div class="flex items-center justify-between gap-4">
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Catalog</h2>
+        <div class="flex gap-2">
+          <input id="searchInput" type="search" placeholder="Search stone, color, size, code…" class="w-64 max-w-[60vw] rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          <select id="sortSelect" class="rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="popular">Sort: Popular</option>
+            <option value="priceAsc">Price: Low → High</option>
+            <option value="priceDesc">Price: High → Low</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+      </div>
+      <div id="catalogGrid" class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      <div id="catalogEmpty" class="hidden text-slate-500 text-sm">No items match your search.</div>
+    </div>
+  </section>
+
+  <!-- QUOTE / CONTACT (Netlify Forms) -->
+  <section id="quote" class="border-t border-slate-200 bg-slate-50/60">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Request a Quote</h2>
+      <p class="mt-1 text-slate-600">Tell us which strings you want and quantities. We'll confirm price and shipping.</p>
+      <form name="quote" method="POST" data-netlify="true" class="mt-6 grid sm:grid-cols-2 gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-soft">
+        <input type="hidden" name="form-name" value="quote" />
+        <label class="text-sm">Name<input required name="name" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"/></label>
+        <label class="text-sm">Email<input required type="email" name="email" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2"/></label>
+        <label class="sm:col-span-2 text-sm">Items & Notes<textarea name="notes" rows="5" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Paste codes or describe the beads you want…"></textarea></label>
+        <div class="sm:col-span-2 flex items-center justify-between">
+          <p class="text-xs text-slate-500">Netlify Forms captures submissions. Configure email notifications in Netlify → Forms.</p>
+          <button class="inline-flex items-center rounded-2xl bg-sky-600 px-5 py-3 text-white font-semibold shadow-soft hover:bg-sky-700">Send Request</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-slate-500">
+      © <span id="year"></span> Canton Bead Shop • Built with love • Inventory synced from Google Sheets
+    </div>
+  </footer>
+
+  <script>
+    // --- CONFIG ---
+    const CONFIG = {
+      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7t7O-yUIZNSrglVHnMcRgd2IMAYBQyrdGd6d-JUCoSmxWb5uJNI2G3oKqL8j22BtIBD1yhOXAtsZs/pub?output=csv",
+      INVENTORY_TAB_NAME: "Inventory", // not used for CSV, but kept for clarity
+      FEATURED_COUNT: 12
+    };
+
+    // Popularity weights by stone keyword (tweak as needed)
+    const POPULARITY = new Map([
+      ["amethyst", 9],["rose quartz", 9],["moonstone", 9],["agate", 8],["jade", 8],["turquoise", 8],["lapis", 8],
+      ["onyx", 7],["carnelian", 7],["citrine", 7],["clear quartz", 7],["opal", 7],["garnet", 7],
+      ["hematite", 6],["howlite", 6],["tiger", 6],["rhodonite", 6],["sodalite", 6],
+      ["glass", 5],["pearl", 8],["shell", 5]
+    ]);
+
+    // --- Helpers ---
+    const $ = (sel, el = document) => el.querySelector(sel);
+    const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+    const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
+    const toMoney = (n) => isFinite(n) ? `$${n.toFixed(2)}` : "—";
+
+    function guessPopularityScore(name = "", desc = "") {
+      const text = `${name} ${desc}`.toLowerCase();
+      let score = 1;
+      for (const [k, w] of POPULARITY.entries()) {
+        if (text.includes(k)) score += w;
+      }
+      if (/\b(4mm|6mm|8mm)\b/.test(text)) score += 1; // common sizes
+      if (/\bmatte\b/.test(text)) score += 0.5;       // matte is trendy
+      return score;
+    }
+
+    function imageFor(item) {
+      const q = encodeURIComponent(`${item.Stone || item.Name || item["Full Name"] || "beads"} beads`);
+      // Unsplash Source gives a nice generic image without API keys
+      return `https://source.unsplash.com/600x600/?${q}`;
+    }
+
+    function normalizeRow(row) {
+      // Try to normalize likely column names found in your sheet
+      const name = row["Full Name"] || row["Name"] || row["String"] || row["Item"] || "Bead";
+      const stone = row["Stone"] || "";
+      const code = row["Code"] || row["SKU"] || row["String"] || "";
+      const price = parseFloat(row["Price"] || row["Sell"] || row["Retail"] || row["Value"] || row["$"] || 0);
+      const cost = parseFloat(row["Cost"] || 0);
+      const stock = parseFloat(row["Qty"] || row["Quantity"] || row["Stock"] || row["On Hand"] || 1);
+      const desc = row["Description"] || row["Notes"] || `${stone}`;
+      return { name, stone, code, price, cost, stock, desc };
+    }
+
+    function scoreItem(item) {
+      const pop = guessPopularityScore(item.name, item.desc);
+      // Prefer in‑stock, mid price ($5–$20), and smaller strings (heuristic via name)
+      const inStock = item.stock > 0 ? 4 : 0;
+      const priceBand = (item.price>0 && item.price <= 25) ? 3 : (item.price <= 50 ? 2 : 1);
+      const sizeHint = /(4mm|6mm|8mm)/i.test(item.name) ? 1.5 : 0;
+      return pop + inStock + priceBand + sizeHint;
+    }
+
+    function renderCard(item) {
+      const img = imageFor(item);
+      return `
+        <article class="group rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-soft hover:-translate-y-0.5 transition">
+          <div class="aspect-square overflow-hidden">
+            <img alt="${item.name}" src="${img}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='https://via.placeholder.com/600x600?text=Beads'" />
+          </div>
+          <div class="p-4">
+            <div class="text-xs text-slate-500">${item.stone || "Beads"}${item.code ? ` • ${item.code}` : ""}</div>
+            <h3 class="mt-1 font-semibold line-clamp-2">${item.name}</h3>
+            <div class="mt-2 flex items-center justify-between">
+              <div class="text-sky-700 font-semibold">${item.price ? toMoney(item.price) : "Ask"}</div>
+              <button class="text-sm rounded-xl border border-slate-300 px-3 py-1.5 hover:bg-slate-50" onclick='prefillQuote(${JSON.stringify({code: ""}).replace("'","\'")})'>Ask</button>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function prefillQuote({ code = "" } = {}) {
+      const notes = $("textarea[name=notes]");
+      if (!notes) return;
+      const line = code ? `Interested in: ${code}` : "Interested in item shown.";
+      notes.value = notes.value ? notes.value + "\n" + line : line;
+      location.hash = "#quote";
+    }
+
+    function hydrateFeatured(items) {
+      const grid = $("#featuredGrid");
+      grid.innerHTML = items.map(renderCard).join("");
+    }
+
+    function hydrateCatalog(items) {
+      const grid = $("#catalogGrid");
+      grid.innerHTML = items.map(renderCard).join("");
+      $("#catalogEmpty").classList.toggle("hidden", items.length !== 0);
+    }
+
+    function applySearchAndSort(base) {
+      const q = $("#searchInput").value.trim().toLowerCase();
+      const sort = $("#sortSelect").value;
+      let items = base.filter(i => {
+        const hay = `${i.name} ${i.stone} ${i.code} ${i.desc}`.toLowerCase();
+        return hay.includes(q);
+      });
+      if (sort === "priceAsc") items.sort((a,b)=> (a.price||1e9)-(b.price||1e9));
+      else if (sort === "priceDesc") items.sort((a,b)=> (b.price||0)-(a.price||0));
+      else if (sort === "name") items.sort((a,b)=> a.name.localeCompare(b.name));
+      else items.sort((a,b)=> scoreItem(b)-scoreItem(a)); // popular
+      return items;
+    }
+
+    async function loadInventory() {
+      return new Promise((resolve, reject) => {
+        Papa.parse(CONFIG.SHEET_CSV_URL, {
+          download: true,
+          header: true,
+          dynamicTyping: true,
+          complete: (res) => resolve(res.data.filter(r=>Object.keys(r).length>1)),
+          error: reject
+        });
+      });
+    }
+
+    (async function init() {
+      $("#year").textContent = new Date().getFullYear();
+      try {
+        const raw = await loadInventory();
+        const items = raw.map(normalizeRow);
+        // Featured
+        const candidate = items.filter(i => i.stock > 0);
+        candidate.sort((a,b)=> scoreItem(b)-scoreItem(a));
+        const featured = candidate.slice(0, CONFIG.FEATURED_COUNT);
+        hydrateFeatured(featured);
+        // Catalog
+        let current = items.slice();
+        hydrateCatalog(applySearchAndSort(current));
+        $("#searchInput").addEventListener("input", ()=> hydrateCatalog(applySearchAndSort(current)));
+        $("#sortSelect").addEventListener("change", ()=> hydrateCatalog(applySearchAndSort(current)));
+        $("#shuffleFeatured").addEventListener("click", ()=> {
+          featured.sort(()=> Math.random() - 0.5);
+          hydrateFeatured(featured);
+        });
+      } catch (err) {
+        console.error(err);
+        $("#featuredGrid").innerHTML = `<div class='text-slate-600'>Could not load inventory. Check your published CSV link.</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>
