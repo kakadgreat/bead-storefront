@@ -1,13 +1,14 @@
 
-# Bead Storefront (Netlify-ready)
+# Bead Storefront (Customer Portal)
 
-A single-file storefront that reads your published Google Sheet CSV, auto-selects **Featured** fast movers, and provides a **Netlify Forms** quote flow.
+Minimal, customer-facing catalog that reads your published Google Sheet CSV, includes thin filters (Stone, Shape, Size, Price), small thumbnails, and a cart‑lite **My List**. Submitting the **Send Request** form emails you via **Netlify Forms** with the selected items and customer details.
 
 ## Deploy
-1. Push this folder to a new GitHub repo (e.g., `bead-storefront`).
-2. In Netlify: **Add new site → Import from GitHub**. No build command needed.
-3. After deploy, go to **Netlify → Forms** and enable notifications for the `quote` form.
+1. Push to a GitHub repo (e.g., `bead-storefront`).
+2. Netlify → **Add new site** → **Import from GitHub** (no build command).
+3. Netlify → **Forms** → enable notifications for form `request`.
 
 ## Config
-- The CSV URL is set inside `index.html` at `CONFIG.SHEET_CSV_URL`.
-- Adjust fast-mover logic via the `POPULARITY` map and `scoreItem()`.
+- Edit CSV URL inside `index.html` under `CONFIG.SHEET_CSV_URL`.
+- Shapes are auto‑derived from item names when a `Shape` column isn't present.
+- Sizes are parsed like `4mm`, `6mm`, `8mm`, … from the name if a `Size` column is missing.
