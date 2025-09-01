@@ -233,6 +233,7 @@ function printArea(){
   </section>`;
 }
 
+
 function page({ title, desc, stones, items, h1 }){
   const uniqueStones = Array.from(new Set(stones));
   return head({title, desc}) +
@@ -242,7 +243,7 @@ function page({ title, desc, stones, items, h1 }){
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">${h1}</h1>
     </div>
     ${filters(uniqueStones)}
-    <div id="catalogGrid">${grid(items)}</div>
+    <div id="catalogGrid"></div>
     <div id="catalogEmpty" class="hidden text-slate-500 text-sm mt-6">No items match your filters.</div>
     <div id="recentlyWrap" class="mt-10">
       <div id="recently"></div>
@@ -252,93 +253,8 @@ function page({ title, desc, stones, items, h1 }){
   ${drawer()}
   ${printArea()}
   </main>
-  <script>const DATA = ${JSON.stringify(items)};</script>
-  <script>
-    const fStone = document.getElementById("fStone");
-    const fShape = document.getElementById("fShape");
-    const fSize = document.getElementById("fSize");
-    const fPrice = document.getElementById("fPrice");
-    const searchInput = document.getElementById("searchInput");
-    const clearBtn = document.getElementById("clearFilters");
-    const catalogGrid = document.getElementById("catalogGrid");
-    const catalogEmpty = document.getElementById("catalogEmpty");
-
-    function populateFilterOptions(items){
-      const shapes = [...new Set(items.map(i=>i.shape).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-      const sizes  = [...new Set(items.map(i=>i.size).filter(Boolean))].sort((a,b)=>{
-        const na = parseInt(String(a).replace(/[^0-9]/g,''))||0;
-        const nb = parseInt(String(b).replace(/[^0-9]/g,''))||0;
-        return na-nb;
-      });
-      fShape.innerHTML = '<option value="">Shape: All</option>' + shapes.map(function(s){ return '<option>' + s + '</option>'; }).join('');
-      fSize.innerHTML  = '<option value="">Size: All</option>'  + sizes.map(function(s){ return '<option>' + s + '</option>'; }).join('');
-    }
-    populateFilterOptions(DATA);
-
-    function applyFilters(items){
-      const q = searchInput.value.toLowerCase().trim();
-      const sStone = fStone.value;
-      const sShape = fShape.value;
-      const sSize  = fSize.value;
-      const sPrice = fPrice.value;
-      [fStone,fShape,fSize,fPrice].forEach(el => el.classList.toggle("filter-active", !!el.value));
-
-      let out = items.filter(i => {
-        const hay = `${i.name} ${i.stone} ${i.shape} ${i.size}`.toLowerCase();
-        if(q && !hay.includes(q)) return false;
-        if(sStone && i.stone !== sStone) return false;
-        if(sShape && i.shape !== sShape) return false;
-        if(sSize  && i.size  !== sSize) return false;
-        if(sPrice){
-          const [lo, hi] = sPrice.split("-").map(Number);
-          const p = i.price || 0;
-          if(!(p>=lo && p<hi)) return false;
-        }
-        return true;
-      });
-      const html = out.map(it => `<?CARD?>`.replace("<?CARD?>", `
-        <article class=\"card rounded-xl bg-white border border-slate-200 overflow-hidden p-3\">
-          <div class=\"flex items-center justify-between\">
-            <span class=\"badge\">${it.stone}</span>
-            <button title=\"Save to Favorites\" data-fav=\"${it.id}\" onclick=\"toggleFav('${it.id}')\">♡</button>
-          </div>
-          <h3 class=\"mt-2 text-sm font-semibold\">${it.name}</h3>
-          <div class=\"mt-1 text-xs text-slate-500\">${it.shape ? it.shape : ""}${it.size ? (it.shape? " • ":"") + it.size : ""}</div>
-          <div class=\"mt-2 flex items-center justify-between\">
-            <div class=\"text-sky-700 font-semibold\">$${(it.price||0).toFixed(2)}</div>
-            <div class=\"flex items-center gap-2\">
-              <input type=\"number\" min=\"1\" value=\"1\" class=\"w-20 rounded border border-slate-300 px-2 py-1\" id=\"qty_${it.id}\"/>
-              <button class=\"text-xs rounded-lg border border-slate-300 px-2.5 py-1.5 hover:bg-slate-50\" onclick=\"(function(){ const q = parseInt(document.getElementById('qty_${it.id}').value||1); addToCart(${JSON.stringify(it)}, Math.max(1,q)); })()\">Add</button>
-            </div>
-          </div>
-        </article>`)).join("");
-      catalogGrid.innerHTML = html;
-      catalogEmpty.classList.toggle("hidden", out.length !== 0);
-      renderFavIcons();
-    }
-
-    [\"input\",\"change\"].forEach(evt => {
-      fStone.addEventListener(evt, ()=>applyFilters(DATA));
-      fShape.addEventListener(evt, ()=>applyFilters(DATA));
-      fSize.addEventListener(evt,  ()=>applyFilters(DATA));
-      fPrice.addEventListener(evt, ()=>applyFilters(DATA));
-      searchInput.addEventListener(evt, ()=>applyFilters(DATA));
-    });
-    clearBtn.addEventListener(\"click\", ()=>{ clearFilters([\"fStone\",\"fShape\",\"fSize\",\"fPrice\"]); applyFilters(DATA); });
-
-    renderRecently(\"recently\", DATA);
-
-    document.getElementById(\"openList\").addEventListener(\"click\", ()=>{ document.getElementById(\"drawer\").style.transform = \"translateX(0)\"; });
-    document.getElementById(\"closeList\").addEventListener(\"click\", ()=>{ document.getElementById(\"drawer\").style.transform = \"translateX(100%)\"; });
-    document.getElementById(\"goRequest\").addEventListener(\"click\", ()=>{ document.getElementById(\"drawer\").style.transform = \"translateX(100%)\"; });
-    document.getElementById(\"clearList\").addEventListener(\"click\", ()=>{ localStorage.setItem(\"bead_cart_v2\",\"[]\"); updateCartUI(); });
-
-    document.getElementById(\"printSummary\")?.addEventListener(\"click\", printSummary);
-    document.getElementById(\"printSummaryDrawer\")?.addEventListener(\"click\", printSummary);
-
-    updateCartUI();
-    renderFavIcons();
-  </script>` + footer();
+  <script>window.DATA = ${JSON.stringify(items)};</script>
+  <script src="/assets/js/page.js"></script>` + footer();
 }
 
 function ensureDir(p){ fs.mkdirSync(p, { recursive: true }); }
