@@ -1,15 +1,13 @@
-
 # Bead Storefront – Multi‑page (SEO‑friendly)
 
-New in this build:
-- **Recently Viewed** carousel on every page
-- **Share My List** (URL hash) and **Export CSV**
-- Card content: Full Name, Stone tag, combined Shape, Size, Price, Qty + Add
-- All earlier fixes: Price parsing from `$ 35.00`, Size1/Size2 → `mm`, Add‑to‑List, per‑stone pages
+**What’s included**
+- Home page: stone pills (3 per row), color swatches, links to `/stone/<stone>/`
+- Stone pages: filters (Shape/Size/Price/Search), 3-col grid, labeled cards (Full name, Stone, Shape, Size, Price)
+- Add‑to‑List (no inline JS; event delegation), Favorites ♥, Recently Viewed carousel
+- Shareable list URL, CSV export, wholesale tiers, printable summary
+- Tailwind via CDN (no CSS build step)
 
 ## Deploy
-1. Push this repo to GitHub.
-2. Netlify → Add new site → Import from GitHub (runs `npm run build`).
-3. It publishes `dist/` with `/` and `/stone/<stone>/` pages.
-
-CSV source is in `scripts/build.mjs` (`CSV_URL`).
+1. Push to GitHub
+2. Netlify → New site from Git → Build command: `npm run build`, Publish dir: `dist`
+3. Done

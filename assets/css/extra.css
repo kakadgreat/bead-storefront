@@ -1,10 +1,32 @@
+/* Basic tweaks */
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:9999px;background:#f1f5f9;color:#0f172a;font-size:12px;border:1px solid #e2e8f0}
+.card{box-shadow:0 4px 14px rgba(2,6,23,.06)}
+.filters-sticky{position:sticky;top:4.25rem;z-index:20;background:#fff;padding:8px;border-radius:12px;border:1px solid #e2e8f0}
+.btn-clear{background:#f8fafc;border:1px solid #e2e8f0;color:#334155}
+.btn-clear:hover{background:#f1f5f9}
+.filter-active{outline:2px solid #bae6fd; background:#f0f9ff}
+.no-print{}
+@media print{ .no-print{ display:none !important; } body{ background:#fff } }
 
-.badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; border:1px solid #cbd5e1; background:#fff; }
-.filter-active { outline: 2px solid rgba(2,132,199,0.8); border-color: rgba(2,132,199,0.6); }
-.btn-clear { background:#eff6ff; color:#075985; border:1px solid #93c5fd; }
-.card { box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
-.carousel { display:grid; grid-auto-flow:column; grid-auto-columns: 70%; gap:12px; overflow-x:auto; padding-bottom:8px;}
-.carousel::-webkit-scrollbar{height:8px} .carousel::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
-@media (min-width:640px){ .carousel{ grid-auto-columns: 33%; } }
-@media (min-width:1024px){ .carousel{ grid-auto-columns: 25%; } }
-@media print { header, .no-print, footer, #drawer { display:none !important } #printArea { display:block !important } }
+/* Home page: stone pills + swatches */
+.stone-pill{display:flex;align-items:center;gap:10px;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.05)}
+.stone-swatches{display:flex;gap:4px}
+.stone-swatch{width:14px;height:14px;border-radius:9999px;border:1px solid rgba(0,0,0,0.06)}
+
+/* Labels on cards */
+.label{font-size:11px;color:#64748b}
+.value{font-size:12px;color:#0f172a}
+
+/* Responsive 3-col grid */
+.grid-3{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:640px){.grid-3{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+
+/* hide scrollbars for chip row */
+.no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+
+/* Simple carousel */
+.carousel{display:grid;grid-auto-flow:column;grid-auto-columns:75%;gap:12px;overflow:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+@media(min-width:640px){.carousel{grid-auto-columns:45%}}
+@media(min-width:1024px){.carousel{grid-auto-columns:30%}}
+.carousel > *{scroll-snap-align:start}

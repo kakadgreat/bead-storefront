@@ -10,7 +10,6 @@ const WHOLESALE_TIERS = [
   { minQty: 10, discount: 0.10 },
   { minQty: 20, discount: 0.15 },
 ];
-
 function priceWithTiers(unit, qty){
   let disc = 0;
   for(const t of WHOLESALE_TIERS){ if(qty >= t.minQty) disc = Math.max(disc, t.discount); }
@@ -40,7 +39,6 @@ function cartTotals(list){
   const count = list.reduce((a,c)=> a + (c.qty||1), 0);
   return { total, count };
 }
-
 function updateCartUI(){
   const list = loadCart();
   const { total, count } = cartTotals(list);
@@ -104,7 +102,6 @@ function pushRecent(item){
   localStorage.setItem(STORAGE.RECENT, JSON.stringify(rec.slice(0,12)));
 }
 function getRecent(){ try{return JSON.parse(localStorage.getItem(STORAGE.RECENT))||[]}catch{return[]} }
-
 function renderRecently(containerId, dataset){
   const el = document.getElementById(containerId);
   if(!el) return;
@@ -178,8 +175,7 @@ function exportCSV(){
 }
 
 // Filters & UI helpers
-function highlightSelected(el){ if(!el) return; el.classList.toggle("filter-active", !!el.value); }
-function clearFilters(ids){ ids.forEach(id=>{const el=document.getElementById(id); if(el){el.value=""; highlightSelected(el);}}); const si=$("#searchInput"); if(si) si.value=""; }
+function clearFilters(ids){ ids.forEach(id=>{const el=document.getElementById(id); if(el){el.value=""; el.classList.remove('filter-active');}}); const si=$("#searchInput"); if(si) si.value=""; }
 
 // Print
 function fillPrintArea(){
@@ -218,7 +214,7 @@ function fillPrintArea(){
 }
 function printSummary(){ fillPrintArea(); window.print(); }
 
-// Expose
+// Expose needed funcs
 window.addToCart = addToCart;
 window.updateCartQty = updateCartQty;
 window.removeCart = removeCart;

@@ -75,7 +75,6 @@ function normalize(rows){
     return { id, name, stone, shape, size, price, code };
   }).filter(x => x.name && x.stone);
 }
-
 function head(title, desc){
   return [
     '<!DOCTYPE html><html lang="en"><head>',
@@ -125,21 +124,27 @@ function card(it){
   const id = it.id;
   return [
     '<article class="card rounded-xl bg-white border border-slate-200 overflow-hidden p-3" data-id="'+id+'">',
-    '<div class="flex items-center justify-between">',
-    '<span class="badge">'+ (it.stone||'') +'</span>',
-    '<button title="Save to Favorites" data-fav="'+id+'">♡</button>',
-    '</div>',
-    '<h3 class="mt-2 text-sm font-semibold">'+ (it.name||'') +'</h3>',
-    '<div class="mt-1 text-xs text-slate-500">'+ ((it.shape? it.shape : '') + (it.size ? ((it.shape? ' • ' : '') + it.size) : '')) +'</div>',
-    '<div class="mt-2 flex items-center justify-between">',
-    '<div class="text-sky-700 font-semibold">$'+ Number(it.price||0).toFixed(2) +'</div>',
-    '<div class="flex items-center gap-2">',
-    '<input type="number" min="1" value="1" class="w-20 rounded border border-slate-300 px-2 py-1" data-qty="'+id+'"/>',
-    '<button class="add-btn text-xs rounded-lg border border-slate-300 px-2.5 py-1.5 hover:bg-slate-50" data-id="'+id+'">Add</button>',
-    '</div></div></article>'
+      '<div class="flex items-center justify-between">',
+        '<span class="badge">'+ (it.stone||'') +'</span>',
+        '<button title="Save to Favorites" data-fav="'+id+'">♡</button>',
+      '</div>',
+      '<div class="mt-2 space-y-1">',
+        '<div><div class="label">Full name</div><div class="value font-medium">'+ (it.name||'') +'</div></div>',
+        '<div class="grid grid-cols-2 gap-2">',
+          '<div><div class="label">Stone</div><div class="value">'+ (it.stone||'') +'</div></div>',
+          '<div><div class="label">Price</div><div class="value text-sky-700 font-semibold">$'+ Number(it.price||0).toFixed(2) +'</div></div>',
+          '<div><div class="label">Shape</div><div class="value">'+ ((it.shape||'') || '-') +'</div></div>',
+          '<div><div class="label">Size</div><div class="value">'+ ((it.size||'') || '-') +'</div></div>',
+        '</div>',
+      '</div>',
+      '<div class="mt-3 flex items-center justify-between">',
+        '<input type="number" min="1" value="1" class="w-24 rounded border border-slate-300 px-2 py-1" data-qty="'+id+'"/>',
+        '<button class="add-btn text-xs rounded-lg border border-slate-300 px-3 py-2 hover:bg-slate-50" data-id="'+id+'">Add to List</button>',
+      '</div>',
+    '</article>'
   ].join('');
 }
-function grid(items){ return '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">' + items.map(card).join('') + '</div>'; }
+function grid(items){ return '<div class="grid-3">' + items.map(card).join('') + '</div>'; }
 
 function filters(){
   return [
@@ -215,7 +220,6 @@ function printArea(){
     '</table></section>'
   ].join('');
 }
-
 function page(title, desc, stones, items, h1){
   const uniqueStones = Array.from(new Set(stones));
   return [
@@ -236,6 +240,64 @@ function page(title, desc, stones, items, h1){
     footer()
   ].join('');
 }
+function swatchesForStone(stone){
+  const map = {
+    "Amethyst": ["#9b5de5","#b07cf2","#d1b3ff"],
+    "Garnet": ["#7d0a0a","#a61b1b","#c94949"],
+    "Rose Quartz": ["#f8c9d4","#f3a7ba","#f7dfe6"],
+    "Citrine": ["#f2b705","#ffd166","#ffe29a"],
+    "Peridot": ["#7fb800","#a4d65e","#c9f299"],
+    "Aquamarine": ["#64c5eb","#8fd6f7","#c8ecff"],
+    "Tourmaline": ["#e65f8d","#5fc0a6","#f2d06b"],
+    "Lapis": ["#1446a0","#396cd8","#7ca6ff"],
+    "Onyx": ["#1f2937","#4b5563","#9ca3af"],
+    "Moonstone": ["#a3bffa","#d6e4ff","#eef2ff"]
+  };
+  if(map[stone]) return map[stone];
+  const h = Array.from(stone).reduce((a,c)=>a+c.charCodeAt(0),0)%360;
+  const h2 = (h+30)%360, h3=(h+60)%360;
+  return [`hsl(${h} 70% 85%)`,`hsl(${h2} 70% 80%)`,`hsl(${h3} 70% 75%)`];
+}
+function homeTile(stone, count){
+  const s = slug(stone);
+  const cols = swatchesForStone(stone).map(c => '<span class="stone-swatch" style="background:'+c+'"></span>').join('');
+  return [
+    '<a class="stone-pill" href="/stone/'+s+'/">',
+      '<div class="flex-1">',
+        '<div class="text-sm font-semibold">'+stone+'</div>',
+        '<div class="text-xs text-slate-500">'+count+' items</div>',
+      '</div>',
+      '<div class="stone-swatches">'+cols+'</div>',
+    '</a>'
+  ].join('');
+}
+function homePage(title, desc, stones, counts){
+  const tiles = stones.map(s => homeTile(s, counts[s]||0)).join('');
+  return [
+    head(title, desc),
+    '<header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">',
+    '<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">',
+    '<a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>',
+    '<div class="flex items-center gap-2">',
+    '<button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>',
+    '<button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">',
+    'My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>',
+    '</button>',
+    '</div></div></header>',
+    '<main><section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">',
+    '<h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Stone</h1>',
+    '<div class="grid-3">', tiles ,'</div>',
+    '</section>',
+    requestForm(),
+    drawer(),
+    printArea(),
+    '</main>',
+    '<script src="/assets/js/app.js"></script>',
+    '<script>document.getElementById("printSummaryHeader") && document.getElementById("printSummaryHeader").addEventListener("click", printSummary);',
+    'loadCartFromHash(); updateCartUI();</script>',
+    footer()
+  ].join('');
+}
 
 function ensureDir(p){ fs.mkdirSync(p, { recursive: true }); }
 function writePage(p, html){ ensureDir(path.dirname(p)); fs.writeFileSync(p, html, "utf-8"); }
@@ -247,12 +309,16 @@ const stones = Array.from(new Set(items.map(i=>i.stone))).sort((a,b)=> a.localeC
 
 fs.cpSync("assets", path.join(DIST, "assets"), { recursive: true });
 
+// Home
+const counts = Object.fromEntries(stones.map(s => [s, 0]));
+items.forEach(it => { counts[it.stone] = (counts[it.stone]||0) + 1; });
 writePage(path.join(DIST, "index.html"),
-  page("Canton Bead Shop – Catalog",
-       "Browse beads by stone, shape and size. Build a list and request a quote.",
-       stones, items, "Catalog (All Stones)")
+  homePage("Canton Bead Shop – Browse by Stone",
+           "Shop beads by stone. Then filter by shape, size, and price on the stone page.",
+           stones, counts)
 );
 
+// Stone pages
 const byStone = {};
 for(const it of items){ (byStone[it.stone] = byStone[it.stone] || []).push(it); }
 for(const stone of stones){
