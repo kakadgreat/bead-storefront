@@ -90,21 +90,20 @@ function head(title, desc){
 function slug(s){ return String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 function header(stones){
   const links = stones.map(function(s){
-    return '<a class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm" href="/stone/'+slug(s)+'/">'+s+'</a>';
+    return '<a class="chip-btn px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm" href="/stone/'+slug(s)+'/">'+s+'</a>';
   }).join('');
   return [
     '<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">',
     '<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">',
     '<a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>',
-    '<nav class="hidden md:block flex-1 mx-6"><div class="flex items-center gap-2 overflow-x-auto no-scrollbar">',
-    links,
-    '</div></nav>',
+    '<nav class="hidden md:block flex-1 mx-6 chip-row"><div class="chip-scroll no-scrollbar">', links ,'</div><div class="chip-fade-left"></div><div class="chip-fade-right"></div></nav>',
     '<div class="flex items-center gap-2">',
     '<button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>',
     '<button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">',
     'My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>',
     '</button>',
-    '</div></div></header>'
+    '</div></div></header>',
+    '<div class="mobile-nav md:hidden"><a href="/">Home</a><a href="#request">Request</a><button id="openList">My List</button></div>'
   ].join('');
 }
 function footer(){
@@ -129,7 +128,7 @@ function card(it){
         '<button title="Save to Favorites" data-fav="'+id+'">♡</button>',
       '</div>',
       '<div class="mt-2 space-y-1">',
-        '<div><div class="label">Full name</div><div class="value font-medium">'+ (it.name||'') +'</div></div>',
+        '<div class="value font-medium">'+ (it.name||'') +'</div>',
         '<div class="grid grid-cols-2 gap-2">',
           '<div><div class="label">Stone</div><div class="value">'+ (it.stone||'') +'</div></div>',
           '<div><div class="label">Price</div><div class="value text-sky-700 font-semibold">$'+ Number(it.price||0).toFixed(2) +'</div></div>',
@@ -153,6 +152,13 @@ function filters(){
     '<select id="fSize" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Size: All</option></select>',
     '<select id="fPrice" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">',
       '<option value="">Price: All</option><option value="0-10">$0–$10</option><option value="10-20">$10–$20</option><option value="20-50">$20–$50</option><option value="50-999">$50+</option>',
+    '</select>',
+    '<select id="fSort" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">',
+      '<option value="">Sort: Popular</option>',
+      '<option value="price-asc">Price: Low → High</option>',
+      '<option value="price-desc">Price: High → Low</option>',
+      '<option value="size-asc">Size: Small → Large</option>',
+      '<option value="name-asc">Name: A → Z</option>',
     '</select>',
     '<button id="clearFilters" class="btn-clear rounded-lg px-3 py-2 text-sm">Clear</button>',
     '<div class="relative ml-auto"><input id="searchInput" type="search" placeholder="Search stone, shape, size, name…" class="w-64 max-w-[60vw] rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"/><div id="suggestMenu" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-lg mt-1 shadow hidden z-10"></div></div>',
@@ -271,8 +277,13 @@ function homeTile(stone, count){
     '</a>'
   ].join('');
 }
-function homePage(title, desc, stones, counts){
+function homePage(title, desc, stones, counts, shapes){
   const tiles = stones.map(s => homeTile(s, counts[s]||0)).join('');
+  const shapeTiles = shapes.map(sh => '<a class="stone-pill" href="/shape/'+slug(sh)+'/"><div class="text-sm font-semibold">'+sh+'</div><div class="text-xs text-slate-500">'+(counts[sh]||'')+'</div></a>').join('');
+  const priceTiles = ['0-10','10-20','20-50','50-999'].map(b => {
+    const label = b==='0-10'?'$0–$10':b==='10-20'?'$10–$20':b==='20-50'?'$20–$50':'$50+';
+    return '<a class="stone-pill" href="/price/'+b+'/"><div class="text-sm font-semibold">'+label+'</div><div class="text-xs text-slate-500">range</div></a>';
+  }).join('');
   return [
     head(title, desc),
     '<header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">',
@@ -285,8 +296,9 @@ function homePage(title, desc, stones, counts){
     '</button>',
     '</div></div></header>',
     '<main><section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">',
-    '<h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Stone</h1>',
-    '<div class="grid-3">', tiles ,'</div>',
+    '<h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Price</h1><div class="grid-3">', priceTiles ,'</div>',
+    '<h2 class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Shape</h2><div class="grid-3">', shapeTiles ,'</div>',
+    '<h2 class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Stone</h2><div class="grid-3">', tiles ,'</div>',
     '</section>',
     requestForm(),
     drawer(),
@@ -306,6 +318,7 @@ const csvText = await fetchCSV(CSV_URL);
 const rows = parse(csvText, { columns: true, skip_empty_lines: true });
 const items = normalize(rows);
 const stones = Array.from(new Set(items.map(i=>i.stone))).sort((a,b)=> a.localeCompare(b));
+const shapes = Array.from(new Set(items.map(i=>i.shape).filter(Boolean))).sort((a,b)=> a.localeCompare(b));
 
 fs.cpSync("assets", path.join(DIST, "assets"), { recursive: true });
 
@@ -313,10 +326,34 @@ fs.cpSync("assets", path.join(DIST, "assets"), { recursive: true });
 const counts = Object.fromEntries(stones.map(s => [s, 0]));
 items.forEach(it => { counts[it.stone] = (counts[it.stone]||0) + 1; });
 writePage(path.join(DIST, "index.html"),
-  homePage("Canton Bead Shop – Browse by Stone",
-           "Shop beads by stone. Then filter by shape, size, and price on the stone page.",
-           stones, counts)
+  homePage("Canton Bead Shop – Browse",
+           "Shop beads by price, shape, and stone. Build a list and request a quote.",
+           stones, counts, shapes)
 );
+
+// Shape pages
+const byShape = {};
+for(const it of items){ (byShape[it.shape] = byShape[it.shape] || []).push(it); }
+for(const shape of shapes){
+  const sh = slug(shape);
+  writePage(path.join(DIST, "shape", sh, "index.html"),
+    page(shape + " Beads – Canton Bead Shop",
+         "Shop beads in " + shape + " shape. Build a list and request a quote.",
+         stones, byShape[shape], shape)
+  );
+}
+
+// Price pages
+const buckets = ['0-10','10-20','20-50','50-999'];
+function inBucket(p,b){const a=b.split('-');var lo=Number(a[0]||0), hi=Number(a[1]||999999); return p>=lo && p<hi;}
+for(const b of buckets){
+  const list = items.filter(i => inBucket(Number(i.price)||0, b));
+  writePage(path.join(DIST, "price", b, "index.html"),
+    page('Beads $'+b.replace('-', '–')+' – Canton Bead Shop',
+         'Browse beads by price range $'+b.replace('-', '–')+'.',
+         stones, list, 'Price '+b.replace('-', '–'))
+  );
+}
 
 // Stone pages
 const byStone = {};
