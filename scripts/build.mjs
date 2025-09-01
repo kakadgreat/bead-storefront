@@ -86,8 +86,25 @@ function head({title, desc}){
   <link rel="stylesheet" href="/assets/css/extra.css">
   </head><body class="bg-white text-slate-800">`;
 }
+
 function header(stones){
-  const links = stones.slice(0,12).map(s => `<a class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm" href="/stone/${slug(s)}/">${s}</a>`).join("");
+  const links = stones.map(s => `<a class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm" href="/stone/${slug(s)}/">${s}</a>`).join("");
+  return `<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
+      <nav class="hidden md:block flex-1 mx-6">
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">${links}</div>
+      </nav>
+      <div class="flex items-center gap-2">
+        <button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>
+        <button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">
+          My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>
+        </button>
+      </div>
+    </div>
+  </header>`;
+}
+/">${s}</a>`).join("");
   return `<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
     <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
@@ -137,11 +154,30 @@ function card(it){
 }
 function grid(items){ return `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">${items.map(card).join("")}</div>`; }
 
+
 function filters(stones){
   return `<div class="filters-sticky flex flex-wrap items-center gap-2 mb-4">
-    <select id="fStone" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-      <option value="">Stone: All</option>
-      ${stones.map(s=> `<option>${s}</option>`).join("")}
+    <select id="fShape" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+      <option value="">Shape: All</option>
+    </select>
+    <select id="fSize" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+      <option value="">Size: All</option>
+    </select>
+    <select id="fPrice" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+      <option value="">Price: All</option>
+      <option value="0-10">$0–$10</option>
+      <option value="10-20">$10–$20</option>
+      <option value="20-50">$20–$50</option>
+      <option value="50-999">$50+</option>
+    </select>
+    <button id="clearFilters" class="btn-clear rounded-lg px-3 py-2 text-sm">Clear</button>
+    <div class="relative ml-auto">
+      <input id="searchInput" type="search" placeholder="Search stone, shape, size, name…" class="w-64 max-w-[60vw] rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"/>
+      <div id="suggestMenu" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-lg mt-1 shadow hidden z-10"></div>
+    </div>
+  </div>`;
+}
+</option>`).join("")}
     </select>
     <select id="fShape" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
       <option value="">Shape: All</option>
