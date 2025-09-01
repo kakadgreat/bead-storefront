@@ -88,7 +88,7 @@ function head({title, desc}){
 }
 
 function header(stones){
-  const links = stones.map(s => `<a class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm" href="/stone/${slug(s)}/">${s}</a>`).join("");
+  const links = stones.map(function(s){ return '<a class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm" href="/stone/'+slug(s)+'/">'+s+'</a>'; }).join('');
   return `<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>

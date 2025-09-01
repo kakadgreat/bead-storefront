@@ -4,8 +4,7 @@
   function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
   window.__PAGE_INIT__ = function(){
     const DATA = window.DATA || [];
-    const fStone = document.getElementById("fStone");
-    const fShape = document.getElementById("fShape");
+        const fShape = document.getElementById("fShape");
     const fSize  = document.getElementById("fSize");
     const fPrice = document.getElementById("fPrice");
     const searchInput = document.getElementById("searchInput");
@@ -62,18 +61,17 @@
 
     function applyFilters(items){
       var q = (searchInput.value||'').toLowerCase().trim();
-      var sStone = fStone.value;
+      var sStone = ""; // stone filter removed
       var sShape = fShape.value;
       var sSize  = fSize.value;
       var sPrice = fPrice.value;
 
-      [fStone,fShape,fSize,fPrice].forEach(function(el){ el.classList.toggle('filter-active', !!el.value); });
+      [fShape,fSize,fPrice].forEach(function(el){ el.classList.toggle('filter-active', !!el.value); });
 
       var out = items.filter(function(i){
         var hay = (i.name+' '+i.stone+' '+i.shape+' '+i.size).toLowerCase();
         if(q && hay.indexOf(q) === -1) return false;
-        if(sStone && i.stone !== sStone) return false;
-        if(sShape && i.shape !== sShape) return false;
+                if(sShape && i.shape !== sShape) return false;
         if(sSize  && i.size  !== sSize) return false;
         if(sPrice){
           var parts = sPrice.split('-');
