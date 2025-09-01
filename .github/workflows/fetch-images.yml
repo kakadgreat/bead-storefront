@@ -1,0 +1,38 @@
+name: Fetch Bead Images
+
+on:
+  workflow_dispatch: {}               # allows manual run
+  push:
+    paths:
+      - "data/inventory.csv"          # auto-run if you update inventory.csv
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Run scraper
+        run: |
+          node -v
+          if [ ! -f scripts/fetch-images.mjs ]; then
+            echo "Missing scripts/fetch-images.mjs" && exit 1
+          fi
+          if [ ! -f data/inventory.csv ]; then
+            echo "Missing data/inventory.csv" && exit 1
+          fi
+          node scripts/fetch-images.mjs
+
+      - name: Commit output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/image-column.csv
+          git commit -m "Add/update image-column.csv from scraper" || echo "No changes to commit"
+          git push
