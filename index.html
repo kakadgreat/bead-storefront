@@ -1,35 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Canton Bead Shop</title>
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;padding:2rem;color:#0f172a;background:#f8fafc} .box{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px;box-shadow:0 8px 24px rgba(2,6,23,.06)} a{color:#0369a1}</style>
-  <script>
-    // If this is running locally (or in a repo), this page is just a helper.
-    // On Netlify, the real site is built to /dist/ by "npm run build".
-    // Try redirecting to /dist/ if it exists.
-    (function(){
-      var tryDist = function(){
-        var probe = new Image();
-        probe.onload = function(){ location.href = "./dist/"; };
-        probe.onerror = function(){ /* stay */ };
-        probe.src = "./dist/assets/css/extra.css";
-      };
-      if (document.readyState !== "loading") tryDist();
-      else document.addEventListener("DOMContentLoaded", tryDist);
-    })();
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Canton Bead Shop – Browse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/extra.css">
 </head>
-<body>
-  <div class="box">
-    <h1 style="margin:0 0 8px 0;">Canton Bead Shop</h1>
-    <p>This repository expects Netlify to run <code>npm run build</code> which generates the static site in <code>/dist/</code>.</p>
-    <ol>
-      <li>Push this repo to GitHub</li>
-      <li>Netlify &rarr; New site from Git &rarr; Build command: <code>npm run build</code>, Publish directory: <code>dist</code></li>
-    </ol>
-    <p><strong>Preview locally:</strong> run <code>node scripts/build.mjs</code> then open <a href="./dist/">/dist/index.html</a>.</p>
+<body class="bg-white text-slate-800">
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
+    <nav class="hidden md:flex flex-1 items-center mx-6 chip-row gap-3">
+      <div class="relative group ml-auto">
+        <button class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button>
+        <div class="mega hidden group-hover:block"><div class="mega-inner">
+          <!-- Stone links injected here -->
+        </div></div>
+      </div>
+    </nav>
+    <div class="flex items-center gap-2">
+      <button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>
+      <button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">
+        My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>
+      </button>
+    </div>
   </div>
+</header>
+<main>
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex gap-3 mb-6">
+    <a href="#price" class="stone-pill"><span>💲</span><div><div class="text-sm font-semibold">Browse by Price</div><div class="text-xs text-slate-500">Ranges & Singles</div></div></a>
+    <a href="#stone" class="stone-pill"><span>💎</span><div><div class="text-sm font-semibold">Browse by Stone</div><div class="text-xs text-slate-500">All stones</div></div></a>
+    <a href="#shape" class="stone-pill"><span>🔷</span><div><div class="text-sm font-semibold">Browse by Shape</div><div class="text-xs text-slate-500">Buckets</div></div></a>
+  </div>
+  <h1 id="price" class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Price</h1>
+  <div class="grid-3">
+    <a class="stone-pill" href="/price/exact/3/"><div class="text-sm font-semibold">$3</div><div class="text-xs text-slate-500">exact price</div></a>
+    <a class="stone-pill" href="/price/exact/5/"><div class="text-sm font-semibold">$5</div><div class="text-xs text-slate-500">exact price</div></a>
+    <a class="stone-pill" href="/price/exact/7/"><div class="text-sm font-semibold">$7</div><div class="text-xs text-slate-500">exact price</div></a>
+    <a class="stone-pill" href="/price/exact/10/"><div class="text-sm font-semibold">$10</div><div class="text-xs text-slate-500">exact price</div></a>
+    <a class="stone-pill" href="/price/exact/12/"><div class="text-sm font-semibold">$12</div><div class="text-xs text-slate-500">exact price</div></a>
+    <a class="stone-pill" href="/price/exact/15/"><div class="text-sm font-semibold">$15</div><div class="text-xs text-slate-500">exact price</div></a>
+  </div>
+  <div class="grid-3 mt-3">
+    <a class="stone-pill" href="/price/0-10/"><div class="text-sm font-semibold">$0–$10</div><div class="text-xs text-slate-500">range</div></a>
+    <a class="stone-pill" href="/price/10-20/"><div class="text-sm font-semibold">$10–$20</div><div class="text-xs text-slate-500">range</div></a>
+    <a class="stone-pill" href="/price/20-50/"><div class="text-sm font-semibold">$20–$50</div><div class="text-xs text-slate-500">range</div></a>
+    <a class="stone-pill" href="/price/50-999/"><div class="text-sm font-semibold">$50+</div><div class="text-xs text-slate-500">range</div></a>
+  </div>
+  <h2 id="stone" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Stone</h2>
+  <div class="grid-3">
+    <!-- stone tiles populated in build -->
+  </div>
+  <h2 id="shape" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Shape</h2>
+  <div class="grid-3">
+    <a class="stone-pill" href="/shape/rondelle/"><div class="text-sm font-semibold">Rondelle</div></a>
+    <a class="stone-pill" href="/shape/round/"><div class="text-sm font-semibold">Round</div></a>
+    <a class="stone-pill" href="/shape/oval/"><div class="text-sm font-semibold">Oval</div></a>
+    <a class="stone-pill" href="/shape/drops-briolettes/"><div class="text-sm font-semibold">Drops / Briolettes</div></a>
+    <a class="stone-pill" href="/shape/square-rectangle/"><div class="text-sm font-semibold">Square & Rectangle</div></a>
+    <a class="stone-pill" href="/shape/coin-disc/"><div class="text-sm font-semibold">Coin / Disc</div></a>
+    <a class="stone-pill" href="/shape/heart-fancy/"><div class="text-sm font-semibold">Heart / Fancy</div></a>
+    <a class="stone-pill" href="/shape/nugget-chip-tumble/"><div class="text-sm font-semibold">Nugget / Chip / Tumble</div></a>
+  </div>
+</section>
+</main>
+<script src="/assets/js/app.js"></script>
 </body>
 </html>
