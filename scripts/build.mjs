@@ -127,7 +127,7 @@ function card(it){
     '<article class="card rounded-xl bg-white border border-slate-200 overflow-hidden p-3" data-id="'+id+'">',
     '<div class="flex items-center justify-between">',
     '<span class="badge">'+ (it.stone||'') +'</span>',
-    '<button title="Save to Favorites" data-fav="'+id+'" onclick="toggleFav(''+id+'')">♡</button>',
+    '<button title="Save to Favorites" data-fav="'+id+'" onclick="toggleFav(\''+id+'\')">♡</button>',
     '</div>',
     '<h3 class="mt-2 text-sm font-semibold">'+ (it.name||'') +'</h3>',
     '<div class="mt-1 text-xs text-slate-500">'+ ((it.shape? it.shape : '') + (it.size ? ((it.shape? ' • ' : '') + it.size) : '')) +'</div>',
