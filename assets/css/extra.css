@@ -41,3 +41,8 @@
 .mobile-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;display:flex;justify-content:space-around;padding:8px 8px;z-index:50}
 .mobile-nav a,.mobile-nav button{font-size:12px;color:#334155;border:1px solid #e2e8f0;padding:8px 10px;border-radius:12px;background:#fff}
 @media(min-width:1024px){.mobile-nav{display:none}}
+
+
+/* Prevent stone chip nav from wrapping / exploding */
+.chip-scroll{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;flex-wrap:nowrap}
+.chip-scroll>*{flex:0 0 auto}
