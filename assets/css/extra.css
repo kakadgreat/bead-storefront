@@ -42,3 +42,16 @@ header{box-shadow:0 1px 0 rgba(15,23,42,.06), 0 10px 30px rgba(2,6,23,.04)}
 .mega-inner a:hover{background:#fff; border-color:#e5e7eb}
 #catalog .filters-sticky{position:sticky; top:72px; z-index:20; background:linear-gradient(180deg,#fff,rgba(255,255,255,.95)); padding-top:8px; padding-bottom:8px;}
 h1,h2{letter-spacing:-.015em}
+
+/* ---- Clean Print ---- */
+@media print{
+  body{ background:#fff !important; }
+  header, nav, .filters-sticky, .chip-row, .mobile-nav, .no-print, #drawer, #request, #recentlyWrap, #catalog, .stone-pill, .grid-3, .chip-scroll, .badge, .label, .value, .filters, .search, .card{ display:none !important; }
+  #printArea{ display:block !important; visibility:visible !important; position:static !important; margin:0 !important; padding:0 !important; box-shadow:none !important; }
+  #printArea *{ visibility:visible !important; }
+  footer{ display:none !important; }
+  @page{ margin:12mm; }
+  table{ width:100% !important; border-collapse:collapse !important; font-size:12px !important; }
+  th,td{ border:1px solid #ddd !important; padding:6px 8px !important; }
+  thead{ background:#f2f3f5 !important; }
+}

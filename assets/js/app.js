@@ -208,3 +208,31 @@
     btn && btn.addEventListener('mouseenter', function(){ mega.classList.remove('hidden'); });
   }
 })();
+
+// ---- Force-inject All Stones hover menu in header ----
+(function(){
+  function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+  function unique(arr){ var m={}, out=[]; arr.forEach(function(x){ if(!x) return; if(!m[x]){ m[x]=1; out.push(x);} }); return out; }
+  var header = document.querySelector('header .chip-row');
+  if(!header) return;
+  // Build or reuse container
+  var existing = document.getElementById('mega');
+  if(!existing){
+    var container = document.createElement('div');
+    container.className = 'relative group';
+    container.innerHTML = '<button class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button>' +
+      '<div class="mega hidden group-hover:block" id="mega"><div class="mega-inner"><div id="mega-stones"></div></div></div>';
+    header.appendChild(container);
+  }
+  var target = document.getElementById('mega-stones');
+  if(!target) return;
+  var stones = unique([].map.call(document.querySelectorAll('.chip-row .chip-scroll a'), function(a){ return a.textContent.trim(); })).sort(function(a,b){ return String(a).localeCompare(String(b)); });
+  target.innerHTML = stones.map(function(s){ return '<a href="/stone/'+slug(s)+'/">'+s+'</a>'; }).join('');
+  var mega = document.getElementById('mega');
+  var group = mega && mega.parentElement;
+  if(group){
+    group.addEventListener('mouseleave', function(){ mega.classList.add('hidden'); });
+    var btn = group.querySelector('button');
+    btn && btn.addEventListener('mouseenter', function(){ mega.classList.remove('hidden'); });
+  }
+})();
