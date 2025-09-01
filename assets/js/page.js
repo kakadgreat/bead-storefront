@@ -4,7 +4,6 @@
   var DATA = Array.isArray(window.DATA) ? window.DATA : [];
   var elGrid = document.getElementById("catalogGrid");
   if(!elGrid){ return; }
-  // Breadcrumb under H1
   try{
     var main=document.querySelector('main')||document.body, h1=main.querySelector('h1'), navs=main.querySelectorAll('nav.text-sm, nav.breadcrumb');
     if(h1 && navs.length){ var bc=navs[0]; if(bc!==h1.nextElementSibling){ h1.insertAdjacentElement('afterend', bc); } }
@@ -12,7 +11,7 @@
   function uniq(a){ var m={},out=[]; a.forEach(function(x){ if(!x) return; if(!m[x]){ m[x]=1; out.push(x);} }); return out; }
   function card(it){
     return '<article class="card rounded-xl bg-white border border-slate-200 overflow-hidden p-3" data-id="'+it.id+'">'+
-      '<div class="flex items-center justify-between"><span class="badge">'+(it.stone||'')+'</span><button title="Save">♡</button></div>'+
+      '<div class="flex items-center justify-between"><span class="badge">'+(it.stone||'')+'</span></div>'+
       '<div class="mt-2 space-y-1"><div class="value font-medium">'+(it.name||'')+'</div>'+
       '<div class="grid grid-cols-2 gap-2">'+
       '<div><div class="label">Stone</div><div class="value">'+(it.stone||'')+'</div></div>'+
@@ -44,7 +43,6 @@
     var elEmpty=document.getElementById("catalogEmpty");
     if(elEmpty) elEmpty.classList.toggle("hidden", rows.length>0);
   }
-  // Init selects
   (function(){
     var elShape=document.getElementById("fShape"), elSize=document.getElementById("fSize");
     if(elShape){

@@ -9,64 +9,10 @@
   <link rel="stylesheet" href="/assets/css/extra.css">
 </head>
 <body class="bg-white text-slate-800">
-<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-    <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
-    <nav class="hidden md:flex flex-1 items-center mx-6 chip-row gap-3">
-      <div class="relative group ml-auto">
-        <button class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button>
-        <div class="mega hidden group-hover:block"><div class="mega-inner">
-          <!-- Stone links injected here -->
-        </div></div>
-      </div>
-    </nav>
-    <div class="flex items-center gap-2">
-      <button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>
-      <button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">
-        My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>
-      </button>
-    </div>
+  <div class="p-10 text-center">
+    <h1 class="text-3xl font-bold mb-4">Canton Bead Shop</h1>
+    <p class="mb-4">This is the home page placeholder. Run <code>npm run build</code> to generate full catalog into /dist/index.html.</p>
+    <a href="/dist/index.html" class="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg">Go to Catalog</a>
   </div>
-</header>
-<main>
-<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex gap-3 mb-6">
-    <a href="#price" class="stone-pill"><span>💲</span><div><div class="text-sm font-semibold">Browse by Price</div><div class="text-xs text-slate-500">Ranges & Singles</div></div></a>
-    <a href="#stone" class="stone-pill"><span>💎</span><div><div class="text-sm font-semibold">Browse by Stone</div><div class="text-xs text-slate-500">All stones</div></div></a>
-    <a href="#shape" class="stone-pill"><span>🔷</span><div><div class="text-sm font-semibold">Browse by Shape</div><div class="text-xs text-slate-500">Buckets</div></div></a>
-  </div>
-  <h1 id="price" class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Price</h1>
-  <div class="grid-3">
-    <a class="stone-pill" href="/price/exact/3/"><div class="text-sm font-semibold">$3</div><div class="text-xs text-slate-500">exact price</div></a>
-    <a class="stone-pill" href="/price/exact/5/"><div class="text-sm font-semibold">$5</div><div class="text-xs text-slate-500">exact price</div></a>
-    <a class="stone-pill" href="/price/exact/7/"><div class="text-sm font-semibold">$7</div><div class="text-xs text-slate-500">exact price</div></a>
-    <a class="stone-pill" href="/price/exact/10/"><div class="text-sm font-semibold">$10</div><div class="text-xs text-slate-500">exact price</div></a>
-    <a class="stone-pill" href="/price/exact/12/"><div class="text-sm font-semibold">$12</div><div class="text-xs text-slate-500">exact price</div></a>
-    <a class="stone-pill" href="/price/exact/15/"><div class="text-sm font-semibold">$15</div><div class="text-xs text-slate-500">exact price</div></a>
-  </div>
-  <div class="grid-3 mt-3">
-    <a class="stone-pill" href="/price/0-10/"><div class="text-sm font-semibold">$0–$10</div><div class="text-xs text-slate-500">range</div></a>
-    <a class="stone-pill" href="/price/10-20/"><div class="text-sm font-semibold">$10–$20</div><div class="text-xs text-slate-500">range</div></a>
-    <a class="stone-pill" href="/price/20-50/"><div class="text-sm font-semibold">$20–$50</div><div class="text-xs text-slate-500">range</div></a>
-    <a class="stone-pill" href="/price/50-999/"><div class="text-sm font-semibold">$50+</div><div class="text-xs text-slate-500">range</div></a>
-  </div>
-  <h2 id="stone" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Stone</h2>
-  <div class="grid-3">
-    <!-- stone tiles populated in build -->
-  </div>
-  <h2 id="shape" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Shape</h2>
-  <div class="grid-3">
-    <a class="stone-pill" href="/shape/rondelle/"><div class="text-sm font-semibold">Rondelle</div></a>
-    <a class="stone-pill" href="/shape/round/"><div class="text-sm font-semibold">Round</div></a>
-    <a class="stone-pill" href="/shape/oval/"><div class="text-sm font-semibold">Oval</div></a>
-    <a class="stone-pill" href="/shape/drops-briolettes/"><div class="text-sm font-semibold">Drops / Briolettes</div></a>
-    <a class="stone-pill" href="/shape/square-rectangle/"><div class="text-sm font-semibold">Square & Rectangle</div></a>
-    <a class="stone-pill" href="/shape/coin-disc/"><div class="text-sm font-semibold">Coin / Disc</div></a>
-    <a class="stone-pill" href="/shape/heart-fancy/"><div class="text-sm font-semibold">Heart / Fancy</div></a>
-    <a class="stone-pill" href="/shape/nugget-chip-tumble/"><div class="text-sm font-semibold">Nugget / Chip / Tumble</div></a>
-  </div>
-</section>
-</main>
-<script src="/assets/js/app.js"></script>
 </body>
 </html>
