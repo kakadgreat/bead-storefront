@@ -1,27 +1,23 @@
-# Canton Bead Shop – Images Ready (Option A + E)
 
-**Image priority**
-1. If **Image** column has a URL → use it (overrides placeholders).  
-   - You said you’ll start from **row 700 onward** — that’s fine; the code simply checks if **Image** exists on any row.
-2. Else → show **shape placeholder** from `assets/img/shapes/`.
+# Canton Bead Shop – With Banners & Scraper
 
-### Placeholder table (you can redesign these later)
-| Bucket Label               | Placeholder file now | Put your final design here |
-|---------------------------|----------------------|----------------------------|
-| Faceted                   | `assets/img/shapes/faceted.svg` | Replace same file |
-| Rondelle                  | `assets/img/shapes/rondelle.svg` | Replace same file |
-| Round                     | `assets/img/shapes/round.svg` | Replace same file |
-| Oval                      | `assets/img/shapes/oval.svg` | Replace same file |
-| Drops / Briolettes        | `assets/img/shapes/drops-briolettes.svg` | Replace same file |
-| Square & Rectangle        | `assets/img/shapes/square-rectangle.svg` | Replace same file |
-| Coin / Disc               | `assets/img/shapes/coin-disc.svg` | Replace same file |
-| Heart / Fancy             | `assets/img/shapes/heart-fancy.svg` | Replace same file |
-| Nugget / Chip / Tumble    | `assets/img/shapes/nugget-chip-tumble.svg` | Replace same file |
-| Other                     | `assets/img/shapes/other.svg` | Replace same file |
+## What’s included
+- Short **stone banners** on `/stone/<stone>/` (about 120px high). Put a hero at `assets/img/stones/<stone-slug>.jpg` to override the default.
+- **All shape pages** generated (both exact-shape and bucket shapes).
+- **Image logic:** If the Google Sheet **Image** column has a URL, it's used; otherwise a **shape placeholder** SVG is shown.
+- **IndiaMART scraper script** (`scripts/fetch-images.mjs`) to generate an **Image** column for your sheet.
 
-### Price tile placeholders
-- Exact: `assets/img/price/exact.svg`  
-- Range: `assets/img/price/range.svg`
+## Deploy
+- **Netlify**: Build command `npm run build`, publish `dist`, Node 18.
+- The build pulls your live Google Sheet CSV and generates `/dist` fully.
 
-**Deploy**: Publish `dist/` (already included). To rebuild from your sheet, run `npm run build` (Node 18).
+## IndiaMART scraper (local)
+1. Download your live sheet CSV to `data/inventory.csv`.
+2. Run: `node scripts/fetch-images.mjs`
+3. Paste `data/image-column.csv` into your Sheet’s **Image** column (you can start from row 700+ to roll out slowly).
+
+## Placeholders you can redesign later
+- Shapes: `assets/img/shapes/*.svg` (faceted, rondelle, round, oval, drops-briolettes, square-rectangle, coin-disc, heart-fancy, nugget-chip-tumble, other)
+- Price tiles: `assets/img/price/exact.svg`, `assets/img/price/range.svg`
+- Stone default: `assets/img/stones/_default.svg`
 

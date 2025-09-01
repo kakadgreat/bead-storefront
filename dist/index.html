@@ -1,47 +1,13 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Canton Bead Shop – Browse</title>
+<title>Canton Bead Shop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="/assets/css/extra.css"></head>
-<body class="bg-white text-slate-800" data-stones="Amber|Amethyst|Garnet">
-<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-    <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
-    <nav class="hidden md:flex flex-1 items-center mx-6"><button id="allStonesBtn" class="ml-auto px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button></nav>
-    <div class="flex items-center gap-2">
-      <button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>
-      <button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">
-        My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>
-      </button>
-    </div>
+<body class="bg-white text-slate-800">
+  <div class="mx-auto max-w-3xl px-6 py-16">
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Canton Bead Shop</h1>
+    <p class="text-slate-600">Site is ready. Run <code>npm run build</code> to generate all pages from your live inventory sheet, including stone banners and shape pages.</p>
   </div>
-</header>
-<div id="megaOverlay" class="mega-overlay"></div>
-<div id="megaPanel" class="mega-panel" tabindex="-1"><div class="mega-inner" id="megaList"></div></div>
-<main>
-  <section id="catalog">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      <div class="flex items-center justify-between gap-4 mb-2"><h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Catalog (Sample)</h1></div>
-      <nav class="text-sm text-slate-500 mb-2"><a class="hover:underline" href="/">Home</a> <span class="mx-1">/</span> <span>Catalog (Sample)</span></nav>
-      <div class="filters-sticky flex flex-wrap items-center gap-2 mb-4">
-        <select id="fShape" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Shape: All</option></select>
-        <select id="fSize" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Size: All</option></select>
-        <select id="fPrice" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Price: All</option><option value="0-10">$0–$10</option><option value="10-20">$10–$20</option><option value="20-50">$20–$50</option><option value="50-999">$50+</option></select>
-        <select id="fSort" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Sort: Popular</option><option value="price-asc">Price: Low → High</option><option value="price-desc">Price: High → Low</option><option value="name-asc">Name: A → Z</option></select>
-        <button id="clearFilters" class="btn-clear rounded-lg px-3 py-2 text-sm">Clear</button>
-        <div class="relative ml-auto"><input id="searchInput" type="search" placeholder="Search stone, shape, size, name…" class="w-64 max-w-[60vw] rounded-xl border border-slate-300 px-3 py-2 text-sm"/></div>
-      </div>
-      <div id="catalogGrid"></div><div id="catalogEmpty" class="hidden text-slate-500 text-sm mt-6">No items match your filters.</div>
-    </div>
-  </section>
-  <section id="printArea" class="hidden max-w-4xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-2">Canton Bead Shop – Request Summary</h1>
-    <table class="w-full text-sm border border-slate-300 border-collapse"><thead class="bg-slate-100"><tr><th class="border border-slate-300 p-2 text-left">Item</th><th class="border border-slate-300 p-2 text-left">Stone</th><th class="border border-slate-300 p-2 text-left">Size</th><th class="border border-slate-300 p-2 text-left">Shape</th><th class="border border-slate-300 p-2 text-right">Unit</th><th class="border border-slate-300 p-2 text-right">Qty</th><th class="border border-slate-300 p-2 text-right">Line</th></tr></thead><tbody id="printRows"></tbody><tfoot><tr><td colspan="6" class="border border-slate-300 p-2 text-right font-semibold">Total</td><td class="border border-slate-300 p-2 text-right font-bold" id="printGrand">$0.00</td></tr></tfoot></table>
-  </section>
-</main>
-<script>window.DATA = [{"id": "amber-flat-coin-8-10", "name": "Amber Flat Coin 8–10mm", "stone": "Amber", "shape": "Flat Coin", "size": "8mm to 10mm", "price": 45.0, "code": "AMB-FC-8-10", "image": "https://i.ebayimg.com/images/g/jYAAAOSw06Nh4pvd/s-l1600.webp"}, {"id": "amethyst-faceted-oval-6x8", "name": "Amethyst Faceted Oval 6×8mm", "stone": "Amethyst", "shape": "Faceted Oval", "size": "6mm to 8mm", "price": 35.0, "code": "AME-OV-6x8", "image": "/assets/img/shapes/faceted.svg"}, {"id": "garnet-faceted-rondelle-4-6", "name": "Garnet Faceted Rondelle 4–6mm", "stone": "Garnet", "shape": "Faceted Rondelle", "size": "4mm to 6mm", "price": 25.0, "code": "GAR-RON-4-6", "image": "/assets/img/shapes/faceted.svg"}];</script>
-<script src="/assets/js/page.js"></script>
-<script src="/assets/js/app.js"></script>
 </body></html>
