@@ -127,24 +127,17 @@ function card(it){
     '<article class="card rounded-xl bg-white border border-slate-200 overflow-hidden p-3" data-id="'+id+'">',
     '<div class="flex items-center justify-between">',
     '<span class="badge">'+ (it.stone||'') +'</span>',
-    '<button title="Save to Favorites" data-fav="'+id+'" onclick="toggleFav(\''+id+'\')">♡</button>',
+    '<button title="Save to Favorites" data-fav="'+id+'">♡</button>',
     '</div>',
     '<h3 class="mt-2 text-sm font-semibold">'+ (it.name||'') +'</h3>',
     '<div class="mt-1 text-xs text-slate-500">'+ ((it.shape? it.shape : '') + (it.size ? ((it.shape? ' • ' : '') + it.size) : '')) +'</div>',
     '<div class="mt-2 flex items-center justify-between">',
     '<div class="text-sky-700 font-semibold">$'+ Number(it.price||0).toFixed(2) +'</div>',
     '<div class="flex items-center gap-2">',
-    '<input type="number" min="1" value="1" class="w-20 rounded border border-slate-300 px-2 py-1" id="qty_'+id+'"/>',
-    '<button class="text-xs rounded-lg border border-slate-300 px-2.5 py-1.5 hover:bg-slate-50" onclick="(function(){ var q=parseInt(document.getElementById('qty_'+id+'').value||1); addToCart('+ JSON.stringify({"id":"__ID__","code":"__CODE__","name":"__NAME__","stone":"__STONE__","shape":"__SHAPE__","size":"__SIZE__","price":"__PRICE__"}) +', Math.max(1,q)); })()">Add</button>',
+    '<input type="number" min="1" value="1" class="w-20 rounded border border-slate-300 px-2 py-1" data-qty="'+id+'"/>',
+    '<button class="add-btn text-xs rounded-lg border border-slate-300 px-2.5 py-1.5 hover:bg-slate-50" data-id="'+id+'">Add</button>',
     '</div></div></article>'
-  ].join('')
-  .replace('__ID__', String(it.id||''))
-  .replace('__CODE__', String(it.code||''))
-  .replace('__NAME__', String(it.name||''))
-  .replace('__STONE__', String(it.stone||''))
-  .replace('__SHAPE__', String(it.shape||''))
-  .replace('__SIZE__', String(it.size||''))
-  .replace('__PRICE__', String(it.price||0));
+  ].join('');
 }
 function grid(items){ return '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">' + items.map(card).join('') + '</div>'; }
 

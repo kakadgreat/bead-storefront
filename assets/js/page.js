@@ -110,3 +110,19 @@
   };
   ready(function(){ window.__PAGE_INIT__ && window.__PAGE_INIT__(); });
 })();
+
+  // Event delegation for Add buttons and Fav hearts
+  document.addEventListener('click', function(e){
+    var btn = e.target;
+    if(btn.matches && btn.matches('.add-btn')){
+      var id = btn.getAttribute('data-id');
+      var qtyEl = document.querySelector('input[data-qty="'+id+'"]');
+      var q = parseInt((qtyEl && qtyEl.value) || '1', 10) || 1;
+      // find item by id in DATA
+      var item = (window.DATA || []).find(function(d){ return String(d.id) === String(id); });
+      if(item){ addToCart(item, Math.max(1,q)); }
+    }
+    if(btn.matches && btn.hasAttribute('data-fav') && btn.getAttribute('data-fav')){
+      toggleFav(btn.getAttribute('data-fav'));
+    }
+  });
