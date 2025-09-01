@@ -192,7 +192,7 @@ function requestForm(){
     '<div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">',
     '<div class="flex items-center justify-between"><h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Send Request</h2>',
     '<button id="printSummary" class="rounded-xl border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100">Print Summary</button></div>',
-    '<p class="text-slate-600 mb-4">Add items to your list, then submit your details. We\\'ll reply with price & shipping.</p>',
+    '<p class="text-slate-600 mb-4">Add items to your list, then submit your details. We will reply with price & shipping.</p>',
     '<form name="request" method="POST" data-netlify="true" class="grid sm:grid-cols-2 gap-4 bg-white p-5 rounded-2xl border border-slate-200">',
     '<input type="hidden" name="form-name" value="request"/>',
     '<input type="hidden" id="listPayload" name="listPayload" />',
