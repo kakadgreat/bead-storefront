@@ -18,6 +18,10 @@
     .thin-filter * { font-size: 0.875rem; } /* smaller controls */
     .is-active { outline: 2px solid rgb(2 132 199); outline-offset: 0; border-color: rgb(2 132 199); }
     .badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; border:1px solid #cbd5e1; }
+    @media print {
+      header, #catalog, footer, #drawer { display: none !important; }
+      #printArea { display: block !important; }
+    }
   </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -29,10 +33,13 @@
         <a href="#catalog" class="hover:text-sky-700">Catalog</a>
         <a href="#request" class="hover:text-sky-700">Send Request</a>
       </nav>
-      <button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">
-        My List
-        <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>
+        <button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">
+          My List
+          <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -79,7 +86,10 @@
   <!-- REQUEST FORM (customer info + list) -->
   <section id="request" class="border-t border-slate-200 bg-slate-50/60">
     <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">
-      <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Send Request</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Send Request</h2>
+        <button id="printSummary" class="rounded-xl border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100">Print Summary</button>
+      </div>
       <p class="text-slate-600 mb-4">Add items to your list, then submit your details. We'll reply with price & shipping.</p>
 
       <form name="request" method="POST" data-netlify="true" class="grid sm:grid-cols-2 gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-soft">
@@ -118,6 +128,7 @@
     <div class="h-16 px-4 flex items-center justify-between border-b border-slate-200">
       <h3 class="font-semibold">My List</h3>
       <div class="flex items-center gap-2">
+        <button id="printSummaryDrawer" class="text-sm border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50">Print</button>
         <button id="clearList" class="text-sm text-slate-600 hover:text-slate-800">Clear</button>
         <button id="closeList" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Close</button>
       </div>
@@ -129,6 +140,32 @@
       <a href="#request" id="goRequest" class="inline-flex items-center rounded-xl bg-sky-600 px-4 py-2 text-white text-sm font-semibold shadow-soft hover:bg-sky-700">Proceed</a>
     </div>
   </aside>
+
+  <!-- PRINT AREA (hidden on screen, shown in print) -->
+  <section id="printArea" class="hidden max-w-4xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-2">Canton Bead Shop – Request Summary</h1>
+    <div id="printCustomer" class="text-sm text-slate-700 mb-4"></div>
+    <table class="w-full text-sm border border-slate-300 border-collapse">
+      <thead class="bg-slate-100">
+        <tr>
+          <th class="border border-slate-300 p-2 text-left">Item</th>
+          <th class="border border-slate-300 p-2 text-left">Stone</th>
+          <th class="border border-slate-300 p-2 text-left">Size</th>
+          <th class="border border-slate-300 p-2 text-left">Code</th>
+          <th class="border border-slate-300 p-2 text-right">Unit</th>
+          <th class="border border-slate-300 p-2 text-right">Qty</th>
+          <th class="border border-slate-300 p-2 text-right">Line</th>
+        </tr>
+      </thead>
+      <tbody id="printRows"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" class="border border-slate-300 p-2 text-right font-semibold">Total</td>
+          <td class="border border-slate-300 p-2 text-right font-bold" id="printGrand">$0.00</td>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
 
   <footer class="border-t border-slate-200">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-slate-500">
@@ -150,7 +187,19 @@
 
     const $ = (sel, el = document) => el.querySelector(sel);
     const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
-    const toMoney = (n) => (isFinite(n) && n>0) ? `$${n.toFixed(2)}` : "$0.00";
+    const toMoney = (n) => (isFinite(n) && n>=0) ? `$${Number(n).toFixed(2)}` : "$0.00";
+
+    // --- Case-insensitive accessor ---
+    function ci(row) {
+      const map = Object.fromEntries(Object.entries(row).map(([k,v]) => [String(k).toLowerCase(), v]));
+      return (cands) => {
+        for (const c of cands) {
+          const v = map[String(c).toLowerCase()];
+          if (v !== undefined && v !== null && v !== "") return v;
+        }
+        return undefined;
+      };
+    }
 
     const SHAPES = ["round","oval","teardrop","chip","cube","barrel","faceted","heishi","tube","coin","rice","nugget","disc","bicone","rondelle","roundell","roundel"];
     function deriveShape(name="") {
@@ -159,16 +208,11 @@
       return "";
     }
     function normalizeSize(rawName="", rawSize="") {
-      // Prefer explicit size column
-      let text = (rawSize || rawName || "").toString().toLowerCase();
-      text = text.replace(/mm/g, ""); // strip existing mm to normalize
-      // "7 to 10" or "7-10" or "7 – 10"
+      let text = (rawSize || rawName || "").toString().toLowerCase().replace(/mm/g, "");
       let m = text.match(/(\d{1,2})\s*(?:to|–|-|—)\s*(\d{1,2})/);
       if (m) return `${m[1]}mm to ${m[2]}mm`;
-      // two numbers separated by space (e.g., "rondelle 7 10")
       m = text.match(/(\d{1,2})\s+(\d{1,2})(?!\d)/);
       if (m) return `${m[1]}mm to ${m[2]}mm`;
-      // single size number (2,4,6,...20)
       m = text.match(/\b(2|3|4|5|6|7|8|9|10|12|14|16|18|20)\b/);
       if (m) return `${m[1]}mm`;
       return "";
@@ -183,14 +227,15 @@
     }
 
     function normalizeRow(row) {
-      const name = row["Full Name"] || row["Name"] || row["String"] || row["Item"] || "Bead";
-      const stone = row["Stone"] || "";
-      const code = row["Code"] || row["SKU"] || row["String"] || "";
-      const price = parseFloat(row["Price"] || row["Sell"] || row["Retail"] || row["Value"] || row["$"] || 0) || 0;
-      const stock = parseFloat(row["Qty"] || row["Quantity"] || row["Stock"] || row["On Hand"] || 0) || 0;
-      const desc = row["Description"] || row["Notes"] || `${stone}`;
-      const shape = row["Shape"] || deriveShape(name);
-      const size = normalizeSize(name, row["Size"]);
+      const get = ci(row);
+      const name = get(["Full Name","Name","String","Item"]) || "Bead";
+      const stone = get(["Stone"]) || "";
+      const code = get(["Code","SKU","String"]) || "";
+      const price = parseFloat(get(["Price","Sell","Retail","Value","$"])) || 0;
+      const stock = parseFloat(get(["Qty","Quantity","Stock","On Hand"])) || 1; // default to 1 so items show
+      const desc = get(["Description","Notes"]) || `${stone}`;
+      const shape = get(["Shape"]) || deriveShape(name);
+      const size = normalizeSize(name, get(["Size"]));
       return { name, stone, code, price, stock, desc, shape, size };
     }
 
@@ -202,8 +247,8 @@
       return pop + inStock + priceBand + sizeHint;
     }
 
-    // My List
-    const STORAGE_KEY = "bead_list_v2";
+    // --- My List ---
+    const STORAGE_KEY = "bead_list_v3";
     function loadList() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
     function saveList(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); updateListUI(); }
     function addToList(item, qty=1) {
@@ -258,7 +303,6 @@
     }
 
     function card(item) {
-      // Card without image; with qty input and Add
       const unit = toMoney(item.price||0);
       const sizeBadge = item.size ? `<span class="badge">${item.size}</span>` : "";
       const stoneBadge = item.stone ? `<span class="badge">${item.stone}</span>` : "";
@@ -276,7 +320,6 @@
         </article>`;
     }
 
-    // Helper for id-safe codes
     function cssSafe(s='') { return String(s||'na').replace(/[^a-zA-Z0-9_-]/g, '_'); }
 
     function applyFilters(base) {
@@ -305,8 +348,11 @@
         return true;
       });
 
-      // Default sort by popularity
-      items.sort((a,b)=> scoreItem(b)-scoreItem(a));
+      const sort = $("#sortSelect").value;
+      if (sort === "priceAsc") items.sort((a,b)=> (a.price||1e9)-(b.price||1e9));
+      else if (sort === "priceDesc") items.sort((a,b)=> (b.price||0)-(a.price||0));
+      else if (sort === "name") items.sort((a,b)=> a.name.localeCompare(b.name));
+      else items.sort((a,b)=> scoreItem(b)-scoreItem(a));
       return items;
     }
 
@@ -329,18 +375,55 @@
       $("#fSize").innerHTML  = '<option value="">Size: All</option>'  + sizes.map(s=>`<option>${s}</option>`).join("");
     }
 
-    function highlightSelected(el, active) {
-      el.classList.toggle("is-active", !!active);
-    }
-
+    function highlightSelected(el, active) { el.classList.toggle("is-active", !!active); }
     function clearFilters() {
       $("#searchInput").value = "";
-      ["fStone","fShape","fSize","fPrice"].forEach(id=>{
+      ["fStone","fShape","fSize","fPrice","sortSelect"].forEach(id=>{
         const el = document.getElementById(id);
-        el.value = "";
+        el.value = id==="sortSelect" ? "popular" : "";
         highlightSelected(el, false);
       });
       hydrateCatalog(applyFilters(window._items || []));
+    }
+
+    // PRINT SUMMARY
+    function buildPrintHTML(list, customer) {
+      const rows = list.map(it => {
+        const line = (Number(it.price)||0) * (it.qty||1);
+        return `<tr>
+          <td class="border border-slate-300 p-2">${it.name||""}</td>
+          <td class="border border-slate-300 p-2">${it.stone||""}</td>
+          <td class="border border-slate-300 p-2">${it.size||""}</td>
+          <td class="border border-slate-300 p-2">${it.code||""}</td>
+          <td class="border border-slate-300 p-2" style="text-align:right;">${toMoney(it.price||0)}</td>
+          <td class="border border-slate-300 p-2" style="text-align:right;">${it.qty||1}</td>
+          <td class="border border-slate-300 p-2" style="text-align:right;">${toMoney(line)}</td>
+        </tr>`;
+      }).join("");
+      const total = list.reduce((a,c)=> a + (Number(c.price)||0)*(c.qty||1), 0);
+      const cust = customer || {};
+      const custHtml = `
+        <div><strong>Name:</strong> ${cust.name||""}</div>
+        <div><strong>Company:</strong> ${cust.company||""}</div>
+        <div><strong>Phone:</strong> ${cust.phone||""}</div>
+        <div><strong>Email:</strong> ${cust.email||""}</div>
+        <div><strong>Address:</strong> ${cust.address||""}</div>
+        <div><strong>Comments:</strong> ${cust.comments||""}</div>
+      `;
+      return { rows, total, custHtml };
+    }
+    function fillPrintArea() {
+      const list = loadList();
+      const form = document.forms.request;
+      const customer = form ? Object.fromEntries(new FormData(form).entries()) : {};
+      const {rows, total, custHtml} = buildPrintHTML(list, customer);
+      $("#printRows").innerHTML = rows || `<tr><td colspan="7" class="border border-slate-300 p-3 text-slate-500">No items selected.</td></tr>`;
+      $("#printGrand").textContent = toMoney(total);
+      $("#printCustomer").innerHTML = custHtml;
+    }
+    function printSummary() {
+      fillPrintArea();
+      window.print();
     }
 
     function openDrawer(){ $("#drawer").style.transform = "translateX(0)"; }
@@ -354,12 +437,16 @@
       $("#goRequest").addEventListener("click", closeDrawer);
       $("#clearList").addEventListener("click", ()=>{ saveList([]); });
       $("#clearFilters").addEventListener("click", clearFilters);
-      ["searchInput","fStone","fShape","fSize","fPrice"].forEach(id=>{
+      ["searchInput","fStone","fShape","fSize","fPrice","sortSelect"].forEach(id=>{
         document.getElementById(id).addEventListener("input", ()=> hydrateCatalog(applyFilters(window._items || [])));
         document.getElementById(id).addEventListener("change", ()=> hydrateCatalog(applyFilters(window._items || [])));
       });
+      ["printSummary","printSummaryDrawer","printSummaryHeader"].forEach(id=>{
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("click", printSummary);
+      });
 
-      // Load inventory
+      // Load inventory (no stock filter now)
       const rows = await new Promise((resolve, reject) => {
         Papa.parse(CONFIG.SHEET_CSV_URL, {
           download: true, header: true, dynamicTyping: true,
@@ -367,7 +454,7 @@
           error: reject
         });
       });
-      const items = rows.map(normalizeRow).filter(i=>i.stock>0);
+      const items = rows.map(normalizeRow); // keep all items; stock defaults to 1
       window._items = items;
 
       populateFilters(items);
