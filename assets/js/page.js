@@ -5,6 +5,9 @@
   var elGrid = document.getElementById("catalogGrid");
   var elEmpty = document.getElementById("catalogEmpty");
   if(!elGrid){ return; }
+  // robustly move breadcrumb under H1
+  try{var main=document.querySelector('main')||document.body; var h1=main.querySelector('h1'); var navs=main.querySelectorAll('nav'); if(h1&&navs.length){ var bc=navs[0]; if(bc!==h1.nextElementSibling){ h1.insertAdjacentElement('afterend', bc);} }}catch(e){}
+
 
   // Move breadcrumb under H1 if it's above
   try{

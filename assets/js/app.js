@@ -181,3 +181,30 @@
     [p1,p2,p3].forEach(btn => btn && btn.addEventListener("click", printSummary));
   });
 })();
+
+// Populate 'All Stones' mega with links; auto-hide on mouse out
+(function(){
+  function slug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+  function ensureMega(){
+    // if header doesn't have a group container, create minimal fallback button + panel
+    var hdr = document.querySelector('header .chip-row');
+    if(!hdr) return null;
+    var container = document.createElement('div');
+    container.className = 'relative group';
+    container.innerHTML = '<button class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button><div class="mega hidden group-hover:block" id="mega"><div class="mega-inner"><div id="mega-stones"></div></div></div>';
+    hdr.appendChild(container);
+    return container.querySelector('#mega-stones');
+  }
+  var target = document.getElementById('mega-stones') || ensureMega();
+  if(!target) return;
+  var chips = Array.from(document.querySelectorAll('.chip-row .chip-scroll a')).map(a=>a.textContent.trim());
+  var stones = Array.from(new Set(chips)).sort((a,b)=>a.localeCompare(b));
+  target.innerHTML = stones.map(s=>'<a href="/stone/'+slug(s)+'/">'+s+'</a>').join('');
+  var mega = target.closest('#mega');
+  var group = mega && mega.parentElement;
+  if(group){
+    group.addEventListener('mouseleave', function(){ mega.classList.add('hidden'); });
+    var btn = group.querySelector('button');
+    btn && btn.addEventListener('mouseenter', function(){ mega.classList.remove('hidden'); });
+  }
+})();
