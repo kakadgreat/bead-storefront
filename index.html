@@ -16,6 +16,8 @@
     .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
     .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
     .thin-filter * { font-size: 0.875rem; } /* smaller controls */
+    .is-active { outline: 2px solid rgb(2 132 199); outline-offset: 0; border-color: rgb(2 132 199); }
+    .badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; border:1px solid #cbd5e1; }
   </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -43,7 +45,7 @@
       </div>
 
       <!-- Thin filter row -->
-      <div class="thin-filter grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
+      <div class="thin-filter grid grid-cols-2 md:grid-cols-6 gap-2 mb-4">
         <select id="fStone" class="rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
           <option value="">Stone: All</option>
         </select>
@@ -66,9 +68,10 @@
           <option value="priceDesc">Price: High → Low</option>
           <option value="name">Name</option>
         </select>
+        <button id="clearFilters" class="rounded-lg border border-slate-300 px-3 py-2 hover:bg-slate-50">Clear</button>
       </div>
 
-      <div id="catalogGrid" class="mt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+      <div id="catalogGrid" class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
       <div id="catalogEmpty" class="hidden text-slate-500 text-sm mt-6">No items match your filters.</div>
     </div>
   </section>
@@ -103,7 +106,7 @@
         </label>
 
         <div class="sm:col-span-2 flex items-center justify-between">
-          <div class="text-xs text-slate-500">Your selected items will be sent with this request.</div>
+          <div class="text-xs text-slate-500">Your selected items (with totals) will be sent with this request.</div>
           <button id="submitRequest" class="inline-flex items-center rounded-2xl bg-sky-600 px-5 py-3 text-white font-semibold shadow-soft hover:bg-sky-700">Submit</button>
         </div>
       </form>
@@ -119,9 +122,10 @@
         <button id="closeList" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Close</button>
       </div>
     </div>
-    <div id="listItems" class="p-4 space-y-3 overflow-y-auto h-[calc(100%-8rem)]"></div>
+    <div id="listItems" class="p-4 space-y-3 overflow-y-auto h-[calc(100%-9.5rem)]"></div>
     <div class="p-4 border-t border-slate-200 flex items-center justify-between">
       <div class="text-sm text-slate-600"><span id="listTotalCount">0</span> items</div>
+      <div class="text-sm font-semibold">Total: <span id="grandTotal">$0.00</span></div>
       <a href="#request" id="goRequest" class="inline-flex items-center rounded-xl bg-sky-600 px-4 py-2 text-white text-sm font-semibold shadow-soft hover:bg-sky-700">Proceed</a>
     </div>
   </aside>
@@ -135,29 +139,39 @@
   <script>
     // --- CONFIG ---
     const CONFIG = {
-      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7t7O-yUIZNSrglVHnMcRgd2IMAYBQyrdGd6d-JUCoSmxWb5uJNI2G3oKqL8j22BtIBD1yhOXAtsZs/pub?output=csv",
-      FEATURED_COUNT: 12
+      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7t7O-yUIZNSrglVHnMcRgd2IMAYBQyrdGd6d-JUCoSmxWb5uJNI2G3oKqL8j22BtIBD1yhOXAtsZs/pub?output=csv"
     };
 
     const POPULARITY = new Map([
-      ["amethyst", 9],["rose quartz", 9],["moonstone", 9],["agate", 8],["jade, nephrite", 8],["turquoise", 8],["lapis", 8],
+      ["amethyst", 9],["rose quartz", 9],["moonstone", 9],["agate", 8],["jade", 8],["turquoise", 8],["lapis", 8],
       ["onyx", 7],["carnelian", 7],["citrine", 7],["clear quartz", 7],["opal", 7],["garnet", 7],
       ["hematite", 6],["howlite", 6],["tiger", 6],["rhodonite", 6],["sodalite", 6],["pearl", 8],["glass", 5],["shell", 5]
     ]);
 
     const $ = (sel, el = document) => el.querySelector(sel);
     const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
-    const toMoney = (n) => (isFinite(n) && n>0) ? `$${n.toFixed(2)}` : "—";
+    const toMoney = (n) => (isFinite(n) && n>0) ? `$${n.toFixed(2)}` : "$0.00";
 
-    const SHAPES = ["round","oval","teardrop","chip","cube","barrel","faceted","heishi","tube","coin","rice","nugget","disc","bicone"];
+    const SHAPES = ["round","oval","teardrop","chip","cube","barrel","faceted","heishi","tube","coin","rice","nugget","disc","bicone","rondelle","roundell","roundel"];
     function deriveShape(name="") {
       const t = name.toLowerCase();
-      for (const s of SHAPES) if (t.includes(s)) return s;
-      return "other";
+      for (const s of SHAPES) if (t.includes(s)) return (s === "roundell" || s === "roundel") ? "rondelle" : s;
+      return "";
     }
-    function deriveSize(text="") {
-      const m = String(text).toLowerCase().match(/\b(2mm|3mm|4mm|6mm|8mm|10mm|12mm|14mm|16mm|18mm|20mm)\b/);
-      return m ? m[1] : "";
+    function normalizeSize(rawName="", rawSize="") {
+      // Prefer explicit size column
+      let text = (rawSize || rawName || "").toString().toLowerCase();
+      text = text.replace(/mm/g, ""); // strip existing mm to normalize
+      // "7 to 10" or "7-10" or "7 – 10"
+      let m = text.match(/(\d{1,2})\s*(?:to|–|-|—)\s*(\d{1,2})/);
+      if (m) return `${m[1]}mm to ${m[2]}mm`;
+      // two numbers separated by space (e.g., "rondelle 7 10")
+      m = text.match(/(\d{1,2})\s+(\d{1,2})(?!\d)/);
+      if (m) return `${m[1]}mm to ${m[2]}mm`;
+      // single size number (2,4,6,...20)
+      m = text.match(/\b(2|3|4|5|6|7|8|9|10|12|14|16|18|20)\b/);
+      if (m) return `${m[1]}mm`;
+      return "";
     }
     function guessPopularityScore(name = "", desc = "") {
       const text = `${name} ${desc}`.toLowerCase();
@@ -167,38 +181,36 @@
       if (/\bmatte\b/.test(text)) score += 0.5;
       return score;
     }
-    function imageFor(item) {
-      const q = encodeURIComponent(`${item.stone || item.name || "beads"} beads`);
-      return `https://source.unsplash.com/400x400/?${q}`;
-    }
+
     function normalizeRow(row) {
       const name = row["Full Name"] || row["Name"] || row["String"] || row["Item"] || "Bead";
       const stone = row["Stone"] || "";
       const code = row["Code"] || row["SKU"] || row["String"] || "";
-      const price = parseFloat(row["Price"] || row["Sell"] || row["Retail"] || row["Value"] || row["$"] || 0);
-      const stock = parseFloat(row["Qty"] || row["Quantity"] || row["Stock"] || row["On Hand"] || 1);
+      const price = parseFloat(row["Price"] || row["Sell"] || row["Retail"] || row["Value"] || row["$"] || 0) || 0;
+      const stock = parseFloat(row["Qty"] || row["Quantity"] || row["Stock"] || row["On Hand"] || 0) || 0;
       const desc = row["Description"] || row["Notes"] || `${stone}`;
       const shape = row["Shape"] || deriveShape(name);
-      const size = row["Size"] || deriveSize(name);
+      const size = normalizeSize(name, row["Size"]);
       return { name, stone, code, price, stock, desc, shape, size };
     }
+
     function scoreItem(item) {
       const pop = guessPopularityScore(item.name, item.desc);
       const inStock = item.stock > 0 ? 4 : 0;
       const priceBand = (item.price>0 && item.price <= 25) ? 3 : (item.price <= 50 ? 2 : 1);
-      const sizeHint = /(4mm|6mm|8mm)/i.test(item.name) ? 1.5 : 0;
+      const sizeHint = /(4mm|6mm|8mm)/i.test(item.size) ? 1.5 : 0;
       return pop + inStock + priceBand + sizeHint;
     }
 
     // My List
-    const STORAGE_KEY = "bead_list_v1";
+    const STORAGE_KEY = "bead_list_v2";
     function loadList() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
     function saveList(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); updateListUI(); }
-    function addToList(item) {
+    function addToList(item, qty=1) {
       const list = loadList();
       const existing = list.find(x => x.code === item.code && x.name === item.name);
-      if (existing) existing.qty = (existing.qty || 1) + 1;
-      else list.push({ code: item.code, name: item.name, stone: item.stone, shape: item.shape, size: item.size, price: item.price, qty: 1 });
+      if (existing) existing.qty = (existing.qty || 1) + qty;
+      else list.push({ code: item.code, name: item.name, stone: item.stone, shape: item.shape, size: item.size, price: item.price, qty });
       saveList(list);
     }
     function removeFromList(code) { saveList(loadList().filter(x => x.code !== code)); }
@@ -207,47 +219,65 @@
       const it = list.find(x => x.code === code);
       if (it) { it.qty = Math.max(1, parseInt(qty||1)); saveList(list); }
     }
+    function listTotals(list) {
+      const count = list.reduce((a,c)=>a+(c.qty||1),0);
+      const total = list.reduce((a,c)=> a + (Number(c.price)||0) * (c.qty||1), 0);
+      return {count, total};
+    }
     function updateListUI() {
       const list = loadList();
-      $("#listCount").textContent = list.reduce((a,c)=>a+(c.qty||1),0);
-      $("#listTotalCount").textContent = list.reduce((a,c)=>a+(c.qty||1),0);
-      const html = list.map(it => `
-        <div class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl">
-          <div class="w-14 h-14 bg-slate-100 rounded-lg overflow-hidden">
-            <img loading="lazy" src="${imageFor({stone: it.stone, name: it.name})}" alt="${it.name}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/100?text=Beads'">
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-medium">${it.name}</div>
-            <div class="text-xs text-slate-500">${it.stone || "Beads"} ${it.size? "• "+it.size:""} ${it.shape? "• "+it.shape:""} ${it.code? "• "+it.code:""}</div>
-            <div class="mt-1 flex items-center gap-2 text-sm">
-              <label class="text-slate-500">Qty</label>
-              <input type="number" min="1" value="${it.qty||1}" class="w-16 rounded border border-slate-300 px-2 py-1" oninput="updateQty('${it.code}', this.value)"/>
+      const {count, total} = listTotals(list);
+      $("#listCount").textContent = count;
+      $("#listTotalCount").textContent = count;
+      $("#grandTotal").textContent = toMoney(total);
+      const html = list.map(it => {
+        const lineTotal = (Number(it.price)||0) * (it.qty||1);
+        return `
+        <div class="p-3 border border-slate-200 rounded-xl">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex-1">
+              <div class="text-sm font-medium">${it.name}</div>
+              <div class="text-xs text-slate-500">${it.stone || "Beads"} ${it.size? "• "+it.size:""} ${it.shape? "• "+it.shape:""} ${it.code? "• "+it.code:""}</div>
+            </div>
+            <div class="text-right text-sm">
+              <div class="text-slate-500">Unit: ${toMoney(Number(it.price)||0)}</div>
+              <div class="font-semibold">Line: ${toMoney(lineTotal)}</div>
             </div>
           </div>
-          <button class="text-sm text-rose-600 hover:text-rose-700" onclick="removeFromList('${it.code}')">Remove</button>
-        </div>
-      `).join("");
+          <div class="mt-2 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sm">
+              <label class="text-slate-500">Qty</label>
+              <input type="number" min="1" value="${it.qty||1}" class="w-20 rounded border border-slate-300 px-2 py-1" oninput="updateQty('${it.code}', this.value)"/>
+            </div>
+            <button class="text-sm text-rose-600 hover:text-rose-700" onclick="removeFromList('${it.code}')">Remove</button>
+          </div>
+        </div>`;
+      }).join("");
       $("#listItems").innerHTML = html || '<div class="text-sm text-slate-500">Your list is empty.</div>';
-      $("#listPayload").value = JSON.stringify(list, null, 2);
+      $("#listPayload").value = JSON.stringify({ items: list, totals: { ...listTotals(list) } }, null, 2);
     }
 
     function card(item) {
-      const img = imageFor(item);
+      // Card without image; with qty input and Add
+      const unit = toMoney(item.price||0);
+      const sizeBadge = item.size ? `<span class="badge">${item.size}</span>` : "";
+      const stoneBadge = item.stone ? `<span class="badge">${item.stone}</span>` : "";
       return `
-        <article class="group rounded-xl bg-white border border-slate-200 overflow-hidden shadow-soft">
-          <div class="bg-slate-100" style="aspect-ratio:1/1;">
-            <img loading="lazy" alt="${item.name}" src="${img}" class="w-full h-full object-cover transition" onerror="this.src='https://via.placeholder.com/400?text=Beads'"/>
-          </div>
-          <div class="p-3">
-            <div class="text-[11px] text-slate-500">${item.stone || "Beads"}${item.code ? ` • ${item.code}` : ""}${item.size? ` • ${item.size}`:""}</div>
-            <h3 class="mt-1 text-sm font-semibold line-clamp-2">${item.name}</h3>
-            <div class="mt-2 flex items-center justify-between">
-              <div class="text-sky-700 font-semibold">${item.price ? toMoney(item.price) : "Ask"}</div>
-              <button class="text-xs rounded-lg border border-slate-300 px-2.5 py-1.5 hover:bg-slate-50" onclick='addToList(${JSON.stringify(item)})'>Add</button>
+        <article class="group rounded-xl bg-white border border-slate-200 overflow-hidden shadow-soft p-3">
+          <div class="text-[11px] text-slate-500 flex items-center gap-2">${stoneBadge}${sizeBadge}${item.code ? `<span class='badge'>${item.code}</span>` : ""}</div>
+          <h3 class="mt-1 text-sm font-semibold line-clamp-2">${item.name}</h3>
+          <div class="mt-2 flex items-center justify-between">
+            <div class="text-sky-700 font-semibold">${unit}</div>
+            <div class="flex items-center gap-2">
+              <input type="number" min="1" value="1" class="w-20 rounded border border-slate-300 px-2 py-1" id="qty_${cssSafe(item.code)}" />
+              <button class="text-xs rounded-lg border border-slate-300 px-2.5 py-1.5 hover:bg-slate-50" onclick="(function(){ const q = parseInt(document.getElementById('qty_${cssSafe(item.code)}').value||1); addToList(${JSON.stringify(item)}, Math.max(1,q)); })()">Add</button>
             </div>
           </div>
         </article>`;
     }
+
+    // Helper for id-safe codes
+    function cssSafe(s='') { return String(s||'na').replace(/[^a-zA-Z0-9_-]/g, '_'); }
 
     function applyFilters(base) {
       const q = $("#searchInput").value.trim().toLowerCase();
@@ -255,6 +285,11 @@
       const fShape = $("#fShape").value;
       const fSize = $("#fSize").value;
       const fPrice = $("#fPrice").value;
+
+      highlightSelected($("#fStone"), !!fStone);
+      highlightSelected($("#fShape"), !!fShape);
+      highlightSelected($("#fSize"),  !!fSize);
+      highlightSelected($("#fPrice"), !!fPrice);
 
       let items = base.filter(i => {
         const hay = `${i.name} ${i.stone} ${i.code} ${i.desc} ${i.shape} ${i.size}`.toLowerCase();
@@ -270,12 +305,8 @@
         return true;
       });
 
-      const sort = $("#sortSelect").value;
-      if (sort === "priceAsc") items.sort((a,b)=> (a.price||1e9)-(b.price||1e9));
-      else if (sort === "priceDesc") items.sort((a,b)=> (b.price||0)-(a.price||0));
-      else if (sort === "name") items.sort((a,b)=> a.name.localeCompare(b.name));
-      else items.sort((a,b)=> scoreItem(b)-scoreItem(a));
-
+      // Default sort by popularity
+      items.sort((a,b)=> scoreItem(b)-scoreItem(a));
       return items;
     }
 
@@ -289,12 +320,27 @@
       const shapes = [...new Set(items.map(i=>i.shape).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
       const sizes  = [...new Set(items.map(i=>i.size).filter(Boolean))].sort((a,b)=>{
         const n = x => parseInt(String(x).replace(/[^0-9]/g,"")||0,10);
-        return n(a)-n(b);
+        const m1 = a.match(/(\d+)/), m2 = b.match(/(\d+)/);
+        return (m1?parseInt(m1[1]):0) - (m2?parseInt(m2[1]):0);
       });
 
       $("#fStone").innerHTML = '<option value="">Stone: All</option>' + stones.map(s=>`<option>${s}</option>`).join("");
       $("#fShape").innerHTML = '<option value="">Shape: All</option>' + shapes.map(s=>`<option>${s}</option>`).join("");
       $("#fSize").innerHTML  = '<option value="">Size: All</option>'  + sizes.map(s=>`<option>${s}</option>`).join("");
+    }
+
+    function highlightSelected(el, active) {
+      el.classList.toggle("is-active", !!active);
+    }
+
+    function clearFilters() {
+      $("#searchInput").value = "";
+      ["fStone","fShape","fSize","fPrice"].forEach(id=>{
+        const el = document.getElementById(id);
+        el.value = "";
+        highlightSelected(el, false);
+      });
+      hydrateCatalog(applyFilters(window._items || []));
     }
 
     function openDrawer(){ $("#drawer").style.transform = "translateX(0)"; }
@@ -307,11 +353,13 @@
       $("#closeList").addEventListener("click", closeDrawer);
       $("#goRequest").addEventListener("click", closeDrawer);
       $("#clearList").addEventListener("click", ()=>{ saveList([]); });
-      ["searchInput","fStone","fShape","fSize","fPrice","sortSelect"].forEach(id=>{
+      $("#clearFilters").addEventListener("click", clearFilters);
+      ["searchInput","fStone","fShape","fSize","fPrice"].forEach(id=>{
         document.getElementById(id).addEventListener("input", ()=> hydrateCatalog(applyFilters(window._items || [])));
         document.getElementById(id).addEventListener("change", ()=> hydrateCatalog(applyFilters(window._items || [])));
       });
 
+      // Load inventory
       const rows = await new Promise((resolve, reject) => {
         Papa.parse(CONFIG.SHEET_CSV_URL, {
           download: true, header: true, dynamicTyping: true,
@@ -327,8 +375,10 @@
 
       updateListUI();
 
+      // Inject list payload before submit
       $("#submitRequest").addEventListener("click", () => {
-        $("#listPayload").value = JSON.stringify(loadList(), null, 2);
+        const payload = { items: loadList(), totals: { ...listTotals(loadList()) } };
+        $("#listPayload").value = JSON.stringify(payload, null, 2);
       });
     })();
   </script>

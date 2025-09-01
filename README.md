@@ -1,14 +1,17 @@
 
 # Bead Storefront (Customer Portal)
 
-Minimal, customer-facing catalog that reads your published Google Sheet CSV, includes thin filters (Stone, Shape, Size, Price), small thumbnails, and a cart‑lite **My List**. Submitting the **Send Request** form emails you via **Netlify Forms** with the selected items and customer details.
+- Thin filters (Stone, Shape, Size, Price) + **Clear** button and visual highlight when active.
+- Robust size parsing → normalized like `7mm` or `7mm to 10mm` so the Size filter is populated.
+- Per-card **Qty** input + **Add** button (no images on cards).
+- Shows **unit price** on cards; drawer shows **line totals** and **grand total**.
+- Netlify Forms (`request`) includes JSON payload for items + totals.
 
 ## Deploy
-1. Push to a GitHub repo (e.g., `bead-storefront`).
-2. Netlify → **Add new site** → **Import from GitHub** (no build command).
+1. Push to GitHub (e.g., `bead-storefront`).
+2. Netlify → **Add new site** → **Import from GitHub** (no build step).
 3. Netlify → **Forms** → enable notifications for form `request`.
 
-## Config
-- Edit CSV URL inside `index.html` under `CONFIG.SHEET_CSV_URL`.
-- Shapes are auto‑derived from item names when a `Shape` column isn't present.
-- Sizes are parsed like `4mm`, `6mm`, `8mm`, … from the name if a `Size` column is missing.
+## Notes
+- CSV URL is set in `index.html` at `CONFIG.SHEET_CSV_URL`.
+- Sizes are derived from either the `Size` column or the name (supports `7`, `7-10`, `7 to 10`, `7 10`, and appends `mm`).
