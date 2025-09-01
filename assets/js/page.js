@@ -6,6 +6,16 @@
   var elEmpty = document.getElementById("catalogEmpty");
   if(!elGrid){ return; }
 
+  // Move breadcrumb under H1 if it's above
+  try{
+    var crumb = document.querySelector('#catalog nav.text-sm.text-slate-500');
+    var h1 = document.querySelector('#catalog h1');
+    if(crumb && h1 && crumb.previousElementSibling !== h1){
+      h1.parentNode.insertAdjacentElement('afterend', crumb);
+    }
+  }catch(e){}
+
+
   function buckets(){ return [["0-10",0,10],["10-20",10,20],["20-50",20,50],["50-999",50,999999]]; }
   function inBucket(p,tag){
     var b = buckets().find(function(x){ return x[0]===tag; });

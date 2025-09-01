@@ -2,3 +2,23 @@
 /* Strong no-wrap chip row */
 .chip-scroll{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;flex-wrap:nowrap}
 .chip-scroll>*{flex:0 0 auto}
+
+/* Stronger chip nav */
+.chip-row{position:relative; overflow:hidden;}
+.chip-scroll{display:flex; gap:8px; overflow-x:auto; white-space:nowrap; flex-wrap:nowrap; max-width:100%; scrollbar-width:none;}
+.chip-scroll::-webkit-scrollbar{display:none;}
+.chip-scroll>*{flex:0 0 auto;}
+body{overflow-x:hidden;}
+
+/* Grid helper: 1 col mobile, >=2 cols desktop, up to 3 */
+.grid-3{display:grid; grid-template-columns:repeat(1,minmax(0,1fr)); gap:16px;}
+@media (min-width: 768px){ .grid-3{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media (min-width: 1280px){ .grid-3{grid-template-columns:repeat(3,minmax(0,1fr));} }
+
+/* Breadcrumb under heading spacing handled in markup; keep baseline styles */
+.badge{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;color:#1e3a8a;border-radius:9999px;font-size:12px;padding:.25rem .5rem;}
+.label{font-size:12px;color:#64748b}
+.value{font-size:14px;color:#0f172a}
+.btn-clear{background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe}
+.no-scrollbar::-webkit-scrollbar{display:none}
+.no-scrollbar{scrollbar-width:none}
