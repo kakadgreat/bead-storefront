@@ -1,4 +1,3 @@
-
 import fs from "fs";
 import path from "path";
 import { parse } from "csv-parse/sync";
@@ -11,26 +10,30 @@ async function fetchCSV(url){
   if(!res.ok) throw new Error("Failed to fetch CSV: "+res.status);
   return await res.text();
 }
+
 function ci(row){
   const map = Object.fromEntries(Object.entries(row).map(([k,v]) => [String(k).toLowerCase().trim(), v]));
   return (...cands) => {
-    for(const c of cands){
+    for (const c of cands) {
       const v = map[String(c).toLowerCase()];
-      if(v!==undefined && v!==null && String(v).trim()!=="") return v;
+      if (v !== undefined && v !== null && String(v).trim() !== "") return v;
     }
     return undefined;
   };
 }
+
 function parseMoney(x){
-  if(x===undefined || x===null) return 0;
+  if (x===undefined || x===null) return 0;
   const s = String(x).replace(/\$/g,"").replace(/,/g,"").trim();
   const n = parseFloat(s);
   return isFinite(n) ? n : 0;
 }
+
 function nOnly(x){
   const m = String(x||"").match(/(\d+(?:\.\d+)?)/);
   return m ? parseFloat(m[1]) : undefined;
 }
+
 function normSize(size1, size2, name){
   const s1 = size1!==undefined ? String(size1) : "";
   const s2 = size2!==undefined ? String(size2) : "";
@@ -39,25 +42,32 @@ function normSize(size1, size2, name){
     if(a) return a + "mm";
     return "";
   }
+  // 7-10, 7 to 10, 7 x 10, etc.
   let m = s1.match(/(\d+(?:\.\d+)?)\s*(?:x|to|–|-|—|\s)\s*(\d+(?:\.\d+)?)/i);
   if(m) return fmt(m[1], m[2]);
   const a = nOnly(s1), b = nOnly(s2);
   if(a && b) return fmt(String(a), String(b));
   if(a && !b) return fmt(String(a));
+
+  // Try to infer from name
   let t = String(name||"").toLowerCase().replace(/mm/g,"");
   let m2 = t.match(/(\d{1,2})\s*(?:to|–|-|—|x|\s)\s*(\d{1,2})/);
   if(m2) return fmt(m2[1], m2[2]);
   let m3 = t.match(/\b(2|3|4|5|6|7|8|9|10|12|14|16|18|20)\b/);
   if(m3) return fmt(m3[1]);
+
   return "";
 }
+
 function combineShape(s1, s2){
   const a = String(s1||"").trim();
   let b = String(s2||"").trim();
+  // roundell, roundel → Rondelle
   b = b.toLowerCase()==="roundell" || b.toLowerCase()==="roundel" ? "Rondelle" : b;
   const parts = [a, b].filter(Boolean);
   return parts.join(" ");
 }
+
 function normalize(rows){
   return rows.map((row, idx) => {
     const get = ci(row);
@@ -88,7 +98,9 @@ function head(title, desc){
     '</head><body class="bg-white text-slate-800">'
   ].join('');
 }
+
 function slug(s){ return String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
 function header(stones){
   const links = stones.map(function(s){
     return '<a class="chip-btn px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm" href="/stone/'+slug(s)+'/">'+s+'</a>';
@@ -97,7 +109,7 @@ function header(stones){
     '<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">',
     '<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">',
     '<a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>',
-    '<nav class="hidden md:block flex-1 mx-6 chip-row"><div class="chip-scroll no-scrollbar">'+ links +'</div><div class="chip-fade-left"></div><div class="chip-fade-right"></div></nav>',
+    '<nav class="hidden md:block flex-1 mx-6 chip-row"><div class="chip-scroll no-scrollbar">', links ,'</div><div class="chip-fade-left"></div><div class="chip-fade-right"></div></nav>',
     '<div class="flex items-center gap-2">',
     '<button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>',
     '<button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">',
@@ -107,6 +119,7 @@ function header(stones){
     '<div class="mobile-nav md:hidden"><a href="/">Home</a><a href="#request">Request</a><button id="openList">My List</button></div>'
   ].join('');
 }
+
 function footer(){
   return [
     '<footer class="border-t border-slate-200">',
@@ -120,31 +133,6 @@ function footer(){
     '</body></html>'
   ].join('');
 }
-function card(it){
-  const id = it.id;
-  return [
-    '<article class="card rounded-xl bg-white border border-slate-200 overflow-hidden p-3" data-id="'+id+'">',
-      '<div class="flex items-center justify-between">',
-        '<span class="badge">'+ (it.stone||'') +'</span>',
-        '<button title="Save to Favorites" data-fav="'+id+'">♡</button>',
-      '</div>',
-      '<div class="mt-2 space-y-1">',
-        '<div class="value font-medium">'+ (it.name||'') +'</div>',
-        '<div class="grid grid-cols-2 gap-2">',
-          '<div><div class="label">Stone</div><div class="value">'+ (it.stone||'') +'</div></div>',
-          '<div><div class="label">Price</div><div class="value text-sky-700 font-semibold">$'+ Number(it.price||0).toFixed(2) +'</div></div>',
-          '<div><div class="label">Shape</div><div class="value">'+ ((it.shape||'') || '-') +'</div></div>',
-          '<div><div class="label">Size</div><div class="value">'+ ((it.size||'') || '-') +'</div></div>',
-        '</div>',
-      '</div>',
-      '<div class="mt-3 flex items-center justify-between">',
-        '<input type="number" min="1" value="1" class="w-24 rounded border border-slate-300 px-2 py-1" data-qty="'+id+'"/>',
-        '<button class="add-btn text-xs rounded-lg border border-slate-300 px-3 py-2 hover:bg-slate-50" data-id="'+id+'">Add to List</button>',
-      '</div>',
-    '</article>'
-  ].join('');
-}
-function grid(items){ return '<div class="grid-3">' + items.map(card).join('') + '</div>'; }
 
 function filters(){
   return [
@@ -166,6 +154,7 @@ function filters(){
     '</div>'
   ].join('');
 }
+
 function drawer(){
   return [
     '<aside id="drawer" class="fixed top-0 right-0 h-full w-[90vw] max-w-md bg-white border-l border-slate-200 shadow-xl translate-x-full transition-transform no-print">',
@@ -186,6 +175,7 @@ function drawer(){
     '</div></aside>'
   ].join('');
 }
+
 function requestForm(){
   return [
     '<section id="request" class="border-t border-slate-200 bg-slate-50/60">',
@@ -207,6 +197,7 @@ function requestForm(){
     '</form></div></section>'
   ].join('');
 }
+
 function printArea(){
   return [
     '<section id="printArea" class="hidden max-w-4xl mx-auto p-6">',
@@ -227,29 +218,8 @@ function printArea(){
     '</table></section>'
   ].join('');
 }
-function page(title, desc, stones, items, h1){
-  const crumbs = '<nav class="text-sm text-slate-500 mb-2"><a class="hover:underline" href="/">Home</a> <span class="mx-1">/</span> <span>'+h1+'</span></nav>';
-  const uniqueStones = Array.from(new Set(stones));
-  return [
-    head(title, desc),
-    header(uniqueStones),
-    '<main>'+crumbs+'<section id="catalog"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">',
-    '<div class="flex items-center justify-between gap-4 mb-3"><h1 class="text-2xl sm:text-3xl font-bold tracking-tight">', h1, '</h1></div>',
-    filters(),
-    '<div id="catalogGrid"></div><div id="catalogEmpty" class="hidden text-slate-500 text-sm mt-6">No items match your filters.</div>',
-    '<div id="recentlyWrap" class="mt-10"><div id="recently"></div></div>',
-    '</div></section>',
-    requestForm(),
-    drawer(),
-    printArea(),
-    '</main>',
-    '<script>window.DATA = ', JSON.stringify([]), ';</script>', /* placeholder; will be replaced below */
-    '<script src="/assets/js/page.js"></script>',
-    footer()
-  ].join('');
-}
 
-function swatchesForStone(stone){
+function stoneSwatches(stone){
   const map = {
     "Amethyst": ["#9b5de5","#b07cf2","#d1b3ff"],
     "Garnet": ["#7d0a0a","#a61b1b","#c94949"],
@@ -267,9 +237,10 @@ function swatchesForStone(stone){
   const h2 = (h+30)%360, h3=(h+60)%360;
   return [`hsl(${h} 70% 85%)`,`hsl(${h2} 70% 80%)`,`hsl(${h3} 70% 75%)`];
 }
+
 function homeTile(stone, count){
   const s = slug(stone);
-  const cols = swatchesForStone(stone).map(c => '<span class="stone-swatch" style="background:'+c+'"></span>').join('');
+  const cols = stoneSwatches(stone).map(c => '<span class="stone-swatch" style="background:'+c+'"></span>').join('');
   return [
     '<a class="stone-pill" href="/stone/'+s+'/">',
       '<div class="flex-1">',
@@ -280,6 +251,9 @@ function homeTile(stone, count){
     '</a>'
   ].join('');
 }
+
+function headHTML(){ return '<header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"><a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a><div class="flex items-center gap-2"><button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button><button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span></button></div></div></header>'; }
+
 function homePage(title, desc, stones, counts, shapes, priceCounts){
   const tiles = stones.map(s => homeTile(s, counts[s]||0)).join('');
   const shapeTiles = shapes.map(sh => '<a class="stone-pill" href="/shape/'+slug(sh)+'/"><div class="text-sm font-semibold">'+sh+'</div><div class="text-xs text-slate-500">'+(counts['shape:'+sh]||0)+' items</div></a>').join('');
@@ -288,17 +262,10 @@ function homePage(title, desc, stones, counts, shapes, priceCounts){
     return '<a class="stone-pill" href="/price/'+b+'/"><div class="text-sm font-semibold">'+label+'</div><div class="text-xs text-slate-500">'+(priceCounts[b]||0)+' items</div></a>';
   }).join('');
   const icons = '<div class="flex gap-3 mb-6"><a href="#price" class="stone-pill"><span>💲</span><div><div class="text-sm font-semibold">Browse by Price</div><div class="text-xs text-slate-500">Ranges</div></div></a><a href="#stone" class="stone-pill"><span>💎</span><div><div class="text-sm font-semibold">Browse by Stone</div><div class="text-xs text-slate-500">All stones</div></div></a><a href="#shape" class="stone-pill"><span>🔷</span><div><div class="text-sm font-semibold">Browse by Shape</div><div class="text-xs text-slate-500">Cuts & profiles</div></div></a></div>';
+
   return [
     head(title, desc),
-    '<header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">',
-    '<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">',
-    '<a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>',
-    '<div class="flex items-center gap-2">',
-    '<button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>',
-    '<button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">',
-    'My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span>',
-    '</button>',
-    '</div></div></header>',
+    headHTML(),
     '<main><section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">',
     icons,
     '<h1 id="price" class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Price</h1><div class="grid-3">', priceTiles ,'</div>',
@@ -316,63 +283,101 @@ function homePage(title, desc, stones, counts, shapes, priceCounts){
   ].join('');
 }
 
+function page(title, desc, stones, items, h1){
+  const crumbs = '<nav class="text-sm text-slate-500 mb-2"><a class="hover:underline" href="/">Home</a> <span class="mx-1">/</span> <span>'+h1+'</span></nav>';
+  const uniqueStones = Array.from(new Set(stones));
+  return [
+    head(title, desc),
+    header(uniqueStones),
+    '<main>'+crumbs+'<section id="catalog"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">',
+    '<div class="flex items-center justify-between gap-4 mb-3"><h1 class="text-2xl sm:text-3xl font-bold tracking-tight">', h1, '</h1></div>',
+    filters(),
+    '<div id="catalogGrid"></div><div id="catalogEmpty" class="hidden text-slate-500 text-sm mt-6">No items match your filters.</div>',
+    '<div id="recentlyWrap" class="mt-10"><div id="recently"></div></div>',
+    '</div></section>',
+    requestForm(),
+    drawer(),
+    printArea(),
+    '</main>',
+    '<script>window.DATA = ', JSON.stringify(items) ,';</script>',
+    '<script src="/assets/js/page.js"></script>',
+    footer()
+  ].join('');
+}
+
 function ensureDir(p){ fs.mkdirSync(p, { recursive: true }); }
 function writePage(p, html){ ensureDir(path.dirname(p)); fs.writeFileSync(p, html, "utf-8"); }
 
 const csvText = await fetchCSV(CSV_URL);
 const rows = parse(csvText, { columns: true, skip_empty_lines: true });
 const items = normalize(rows);
+
+// GROUPS
 const stones = Array.from(new Set(items.map(i=>i.stone))).sort((a,b)=> a.localeCompare(b));
 const shapes = Array.from(new Set(items.map(i=>i.shape).filter(Boolean))).sort((a,b)=> a.localeCompare(b));
 
+// COPY ASSETS
 fs.cpSync("assets", path.join(DIST, "assets"), { recursive: true });
 
-// Home
+// HOME
 const counts = Object.fromEntries(stones.map(s => [s, 0]));
 items.forEach(it => { counts[it.stone] = (counts[it.stone]||0) + 1; });
 const priceCounts = Object.fromEntries([['0-10',0],['10-20',0],['20-50',0],['50-999',0]]);
-items.forEach(it=>{const p=Number(it.price)||0; if(p<10) priceCounts['0-10']++; else if(p<20) priceCounts['10-20']++; else if(p<50) priceCounts['20-50']++; else priceCounts['50-999']++;});
+items.forEach(it=>{ const p=Number(it.price)||0; if(p<10) priceCounts['0-10']++; else if(p<20) priceCounts['10-20']++; else if(p<50) priceCounts['20-50']++; else priceCounts['50-999']++; });
 const shapeCounts = Object.fromEntries(shapes.map(s=>['shape:'+s,0]));
 items.forEach(it=>{ if(it.shape) shapeCounts['shape:'+it.shape] = (shapeCounts['shape:'+it.shape]||0)+1; });
 Object.assign(counts, shapeCounts);
 
 writePage(path.join(DIST, "index.html"),
-  homePage("Canton Bead Shop – Browse",
-           "Shop beads by price, stone, and shape. Build a list and request a quote.",
-           stones, counts, shapes, priceCounts)
+  homePage(
+    "Canton Bead Shop – Browse",
+    "Shop beads by price, stone, and shape. Build a list and request a quote.",
+    stones, counts, shapes, priceCounts
+  )
 );
 
-// Shape pages
+// SHAPE PAGES
 const byShape = {};
-for(const it of items){ (byShape[it.shape] = byShape[it.shape] || []).push(it); }
-for(const shape of shapes){
+for (const it of items) { (byShape[it.shape] = byShape[it.shape] || []).push(it); }
+for (const shape of shapes){
   const sh = slug(shape);
-  const html = page(shape + " Beads – Canton Bead Shop",
+  writePage(path.join(DIST, "shape", sh, "index.html"),
+    page(shape + " Beads – Canton Bead Shop",
          "Shop beads in " + shape + " shape. Build a list and request a quote.",
-         stones, [], shape).replace('window.DATA = []','window.DATA = '+JSON.stringify(byShape[shape]));
-  writePage(path.join(DIST, "shape", sh, "index.html"), html);
+         stones, byShape[shape], shape)
+  );
 }
 
-// Price pages
+// PRICE PAGES
 const buckets = ['0-10','10-20','20-50','50-999'];
-function inBucket(p,b){const a=b.split('-');var lo=Number(a[0]||0), hi=Number(a[1]||999999); return p>=lo && p<hi;}
-for(const b of buckets){
+function inBucket(p,b){ const a=b.split('-'); var lo=Number(a[0]||0), hi=Number(a[1]||999999); return p>=lo && p<hi; }
+for (const b of buckets){
   const list = items.filter(i => inBucket(Number(i.price)||0, b));
-  const html = page('Beads $'+b.replace('-', '–')+' – Canton Bead Shop',
+  writePage(path.join(DIST, "price", b, "index.html"),
+    page('Beads $'+b.replace('-', '–')+' – Canton Bead Shop',
          'Browse beads by price range $'+b.replace('-', '–')+'.',
-         stones, [], 'Price '+b.replace('-', '–')).replace('window.DATA = []','window.DATA = '+JSON.stringify(list));
-  writePage(path.join(DIST, "price", b, "index.html"), html);
+         stones, list, 'Price '+b.replace('-', '–'))
+  );
 }
 
-// Stone pages
+// STONE PAGES
 const byStone = {};
-for(const it of items){ (byStone[it.stone] = byStone[it.stone] || []).push(it); }
-for(const stone of stones){
+for (const it of items){ (byStone[it.stone] = byStone[it.stone] || []).push(it); }
+for (const stone of stones){
   const s = slug(stone);
-  const html = page(stone + " Beads – Canton Bead Shop",
+  writePage(path.join(DIST, "stone", s, "index.html"),
+    page(stone + " Beads – Canton Bead Shop",
          "Shop " + stone + " beads by shape and size. Build a list and request a quote.",
-         stones, [], stone).replace('window.DATA = []','window.DATA = '+JSON.stringify(byStone[stone]));
-  writePage(path.join(DIST, "stone", s, "index.html"), html);
+         stones, byStone[stone], stone)
+  );
 }
+
+// FACETED COLLECTION PAGE
+const faceted = items.filter(i => /faceted/i.test((i.shape||"") + " " + (i.name||"")));
+writePage(path.join(DIST, "faceted", "index.html"),
+  page("Faceted Beads – Canton Bead Shop",
+       "Browse all faceted beads. Filter by sub shapes like Faceted Drop, Faceted Flat Oval.",
+       stones, faceted, "Faceted")
+);
 
 console.log("Build complete.");
