@@ -1,0 +1,10 @@
+
+.badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; border:1px solid #cbd5e1; background:#fff; }
+.filter-active { outline: 2px solid rgba(2,132,199,0.8); border-color: rgba(2,132,199,0.6); }
+.btn-clear { background:#eff6ff; color:#075985; border:1px solid #93c5fd; }
+.card { box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+.carousel { display:grid; grid-auto-flow:column; grid-auto-columns: 70%; gap:12px; overflow-x:auto; padding-bottom:8px;}
+.carousel::-webkit-scrollbar{height:8px} .carousel::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+@media (min-width:640px){ .carousel{ grid-auto-columns: 33%; } }
+@media (min-width:1024px){ .carousel{ grid-auto-columns: 25%; } }
+@media print { header, .no-print, footer, #drawer { display:none !important } #printArea { display:block !important } }

@@ -1,16 +1,15 @@
 
-# Bead Storefront (Customer Portal)
+# Bead Storefront – Multi‑page (SEO‑friendly)
 
-Fixes & features:
-- **Items not showing**: case-insensitive column parsing and default stock=1; no stock filter applied.
-- **Filters**: thin row with Clear + highlight when active; Size now reliably parsed and normalized as `mm` or ranges like `7mm to 10mm`.
-- **Cards**: qty input, Add button, unit price shown, no images.
-- **My List**: line totals per item and grand total.
-- **Printable summary**: buttons in header, drawer, and request section; print view shows customer info + table of items with totals.
+New in this build:
+- **Recently Viewed** carousel on every page
+- **Share My List** (URL hash) and **Export CSV**
+- Card content: Full Name, Stone tag, combined Shape, Size, Price, Qty + Add
+- All earlier fixes: Price parsing from `$ 35.00`, Size1/Size2 → `mm`, Add‑to‑List, per‑stone pages
 
-Deploy:
-1. Push to GitHub.
-2. Import to Netlify (no build step).
-3. Enable notifications for form `request`.
+## Deploy
+1. Push this repo to GitHub.
+2. Netlify → Add new site → Import from GitHub (runs `npm run build`).
+3. It publishes `dist/` with `/` and `/stone/<stone>/` pages.
 
-Config: edit CSV URL in `index.html` at `CONFIG.SHEET_CSV_URL`.
+CSV source is in `scripts/build.mjs` (`CSV_URL`).
