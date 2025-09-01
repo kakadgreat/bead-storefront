@@ -270,8 +270,8 @@ function page({ title, desc, stones, items, h1 }){
         const nb = parseInt(String(b).replace(/[^0-9]/g,''))||0;
         return na-nb;
       });
-      fShape.innerHTML = '<option value=\"\">Shape: All</option>' + shapes.map(s=>`<option>${s}</option>`).join("");
-      fSize.innerHTML  = '<option value=\"\">Size: All</option>'  + sizes.map(s=>`<option>${s}</option>`).join("");
+      fShape.innerHTML = '<option value="">Shape: All</option>' + shapes.map(function(s){ return '<option>' + s + '</option>'; }).join('');
+      fSize.innerHTML  = '<option value="">Size: All</option>'  + sizes.map(function(s){ return '<option>' + s + '</option>'; }).join('');
     }
     populateFilterOptions(DATA);
 
