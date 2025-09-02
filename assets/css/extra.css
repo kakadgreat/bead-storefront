@@ -69,3 +69,20 @@ header{box-shadow:0 1px 0 rgba(15,23,42,.06), 0 10px 30px rgba(2,6,23,.04)}
 .short-hero a{border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;background:#fff;display:flex;align-items:center;gap:8px;font-size:13px;color:#0f172a}
 .short-hero a img{width:22px;height:22px;border-radius:6px;border:1px solid #e5e7eb;background:#fff}
 .container{max-width:80rem;margin:0 auto;padding:0 1rem}
+
+/* --- Salient accents --- */
+:root{ --accent:#0ea5e9; --accent2:#6366f1; --glass: rgba(255,255,255,.72); }
+header{ background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.68)); backdrop-filter: blur(10px); }
+.stone-pill{ position:relative; overflow:hidden; }
+.stone-pill::after{ content:""; position:absolute; inset:auto -40% -70% -40%; height:120%; background: radial-gradient(60px 60px at 20% 140%, rgba(14,165,233,.12), transparent 60%), radial-gradient(60px 60px at 80% 140%, rgba(99,102,241,.12), transparent 60%); }
+.tile-title{ letter-spacing:-.01em }
+.badge-soft{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#0f172a; background:linear-gradient(180deg,#fff, #f6f8fb); border:1px solid #e5e7eb; padding:6px 10px; border-radius:999px; box-shadow:0 1px 2px rgba(2,6,23,.04); }
+
+/* Swatches */
+.swatches{display:flex; gap:6px; margin-left:auto;}
+.sw{width:10px;height:10px;border-radius:999px;border:1px solid rgba(0,0,0,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.45)}
+/* Stone pill layout with swatches on right */
+.stone-pill .tile-count{ order:3; margin-left:0; }
+.stone-pill .swatches{ order:2; }
+.short-hero a{ background:linear-gradient(180deg,#fff, #f8fafc); box-shadow:0 1px 2px rgba(2,6,23,.05); }
+.short-hero a:hover{ box-shadow:0 8px 20px rgba(2,6,23,.12); transform:translateY(-1px); transition:.12s }
