@@ -53,7 +53,7 @@ function head(title, desc, stones){
   ].join('');
 }
 function header(){
-  return ['<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"><a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a><nav class="hidden md:flex flex-1 items-center mx-6"><button id="allStonesBtn" class="ml-auto px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button></nav><div class="flex items-center gap-2"><button id="printSummaryHeader" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button><button id="openList" class="relative inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span></button></div></div></header><div id="megaOverlay" class="mega-overlay"></div><div id="megaPanel" class="mega-panel" tabindex="-1"><div class="mega-inner" id="megaList"></div></div>'].join('');
+  return ['<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"><a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a><nav class="hidden md:flex flex-1 items-center mx-6"><a href="/catalog/" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Items (Table)</a><button id="allStonesBtn" class="ml-auto px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button></nav><div class="flex items-center gap-2"><a href="/catalog/" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">All Items</a><button id="printSummaryHeader" class="hidden sm:inline-flex rounded-2xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button><button id="openList" class="relative inline-flex items-center rounded-2xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">My List <span id="listCount" class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-600 text-white text-[11px]">0</span></button></div></div></header><div id="megaOverlay" class="mega-overlay"></div><div id="megaPanel" class="mega-panel" tabindex="-1"><div class="mega-inner" id="megaList"></div></div>'].join('');
 }
 function footer(){
   return '<footer class="border-t border-slate-200"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-slate-500">© <span id="year"></span> Canton Bead Shop</div></footer><script src="/assets/js/app.js"></script><script>document.getElementById("year").textContent=new Date().getFullYear();</script></body></html>';
@@ -107,6 +107,18 @@ function homePage(stones, counts, items){
     + '</section></main>'
     + footer();
 }
+function tablePage(stones, items){
+  return head("All Items – Table View","Browse all items in a compact table.", stones)
+    + header()
+    + '<main><section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">'
+    + '<div class="flex items-center justify-between mb-3"><h1 class="text-2xl sm:text-3xl font-bold tracking-tight">All Items (Table)</h1><a href="/" class="text-sky-700 hover:underline">Home</a></div>'
+    + '<div class="table-controls"><div class="badge">Page size: 50</div><div class="flex items-center gap-2"><input id="tblSearch" type="search" placeholder="Search..." class="rounded-xl border border-slate-300 px-3 py-2 text-sm"/><div class="pagination"><button id="btnPrev">Prev</button><span id="pageInfo" class="text-sm text-slate-600">0–0 of 0</span><button id="btnNext">Next</button></div><button id="addSelected" class="rounded-xl bg-sky-600 text-white px-3 py-2 text-sm">Add selected to List</button></div></div>'
+    + '<div class="table-wrap"><table class="table-catalog"><thead><tr><th style="width:40px"></th><th class="hide-sm" style="width:120px">Code</th><th>Item</th><th style="width:180px">Shape</th><th style="width:160px">Size</th><th style="width:100px" class="text-right">Price</th><th style="width:80px" class="text-right">Qty</th></tr></thead><tbody id="tblBody"></tbody></table></div>'
+    + '</section></main>'
+    + '<script>window.DATA = '+ JSON.stringify(items) +';</script>'
+    + '<script src="/assets/js/app.js"></script><script src="/assets/js/table.js"></script>'
+    + footer();
+}
 
 const csvText = await fetchCSV(CSV_URL);
 const rows = parse(csvText, { columns: true, skip_empty_lines: true });
@@ -125,7 +137,11 @@ fs.cpSync("assets", path.join(DIST,"assets"), { recursive:true });
 const counts=Object.fromEntries(stones.map(s=>[s,0])); items.forEach(it=>{ counts[it.stone]=(counts[it.stone]||0)+1; });
 fs.writeFileSync(path.join(DIST,"index.html"), homePage(stones, counts, items), "utf-8");
 
-// Stone pages with short hero
+// Include catalog page
+fs.mkdirSync(path.join(DIST,"catalog"), {recursive:true});
+fs.writeFileSync(path.join(DIST,"catalog","index.html"), tablePage(stones, items), "utf-8");
+
+// Stone pages
 const byStone={}; for(const it of items){ (byStone[it.stone]=byStone[it.stone]||[]).push(it); }
 for(const st of stones){
   const slugStone = slug(st);
@@ -134,7 +150,7 @@ for(const st of stones){
   fs.writeFileSync(path.join(DIST,"stone", slugStone,"index.html"), html, "utf-8");
 }
 
-// Exact shape pages (based on raw shapes)
+// Exact shape pages
 const byShape={}; for(const it of items){ (byShape[it.shape]=byShape[it.shape]||[]).push(it); }
 for(const sh of Object.keys(byShape)){
   const shSlug = slug(sh);
@@ -143,7 +159,7 @@ for(const sh of Object.keys(byShape)){
   fs.writeFileSync(path.join(DIST,"shape", shSlug,"index.html"), html, "utf-8");
 }
 
-// Bucket shape pages (force create even if empty)
+// Bucket shape pages forced
 for(const b of buckets){
   const list=items.filter(i=> shapeBucket(i.shape)===b );
   const bSlug=slug(b);
@@ -171,4 +187,4 @@ for(const n of singles){
   fs.writeFileSync(path.join(DIST,"price","exact",String(n),"index.html"), html, "utf-8");
 }
 
-console.log("Build complete with banners and forced shape pages");
+console.log("Build complete with new cards, /catalog page, and nav link");
