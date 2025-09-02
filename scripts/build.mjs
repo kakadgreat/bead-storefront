@@ -85,17 +85,34 @@ function page(title, desc, stones, items, h1, stoneForHero){
     + footer();
 }
 function homeTile(stone, count){ return '<a class="stone-pill" href="/stone/'+slug(stone)+'/"><img src="/assets/img/stones/_default.svg" alt="" /><div class="flex-1"><div class="text-sm font-semibold">'+stone+'</div><div class="text-xs text-slate-500">'+String(count)+' items</div></div></a>'; }
+
 function homePage(stones, counts, items){
+  // Shapes bucket counts
   const buckets=["Faceted","Rondelle","Round","Oval","Drops / Briolettes","Square & Rectangle","Coin / Disc","Heart / Fancy","Nugget / Chip / Tumble"];
-  const bucketCounts=Object.fromEntries(buckets.map(b=>[b,0])); items.forEach(i=>{ const b=shapeBucket(i.shape); if(bucketCounts[b]!=null) bucketCounts[b]++; });
-  const shapeTiles=buckets.map(b=>'<a class="stone-pill" href="/shape/'+slug(b)+'/"><img src="/assets/img/shapes/'+slug(b)+'.svg" alt=""/><div class="text-sm font-semibold">'+b+'</div><div class="ml-auto text-xs text-slate-500">'+(bucketCounts[b]||0)+' items</div></a>').join('');
-  const singles=[5,10,12,15,20,25,30,35,40];
-  const singleCounts=Object.fromEntries(singles.map(n=>[n,0])); items.forEach(it=>{ const p=Math.round((Number(it.price)||0)*100)/100; if(singleCounts[p]!=null) singleCounts[p]++; });
-  const priceSingles=singles.map(n=>'<a class="stone-pill" href="/price/exact/'+n+'/"><img src="/assets/img/price/exact.svg" alt=""/><div class="text-sm font-semibold">$'+n+'</div><div class="ml-auto text-xs text-slate-500">'+(singleCounts[n]||0)+' items</div></a>').join('');
-  const priceCounts={'0-10':0,'10-20':0,'20-50':0,'50-999':0}; items.forEach(it=>{ const p=Number(it.price)||0; if(p<10) priceCounts['0-10']++; else if(p<20) priceCounts['10-20']++; else if(p<50) priceCounts['20-50']++; else priceCounts['50-999']++; });
-  const priceRanges=['0-10','10-20','20-50','50-999'].map(b=>{ const label=b==='0-10'?'$0–$10':b==='10-20'?'$10–$20':b==='20-50'?'$20–$50':'$50+'; return '<a class="stone-pill" href="/price/'+b+'/"><img src="/assets/img/price/range.svg" alt=""/><div class="text-sm font-semibold">'+label+'</div><div class="ml-auto text-xs text-slate-500">'+(priceCounts[b]||0)+' items</div></a>'; }).join('');
-  const tiles=stones.map(s=>homeTile(s, counts[s]||0)).join('');
+  const bucketCounts=Object.fromEntries(buckets.map(b=>[b,0]));
+  items.forEach(i=>{ const b=shapeBucket(i.shape); if(bucketCounts[b]!=null) bucketCounts[b]++; });
+
+  // Price singles we actually see in data
+  const common=[5,10,12,15,20,25,30,35,40];
+  const singleCounts=Object.fromEntries(common.map(n=>[n,0]));
+  items.forEach(it=>{ const p=Math.round((Number(it.price)||0)*100)/100; if(singleCounts[p]!=null) singleCounts[p]++; });
+  const priceSingles=common
+    .filter(n=>singleCounts[n]>0)
+    .map(n=>'<a class="stone-pill" href="/price/exact/'+n+'/"><img src="/assets/img/price/exact.svg" alt=""/><div class="text-sm font-semibold">$'+n+'</div><div class="ml-auto text-xs text-slate-500">'+(singleCounts[n]||0)+' items</div></a>').join('');
+
+  // Price ranges
+  const priceCounts={'0-10':0,'10-20':0,'20-50':0,'50-999':0};
+  items.forEach(it=>{ const p=Number(it.price)||0; if(p<10) priceCounts['0-10']++; else if(p<20) priceCounts['10-20']++; else if(p<50) priceCounts['20-50']++; else priceCounts['50-999']++; });
+  const label = (b)=> b==='0-10'?'$0–$10':b==='10-20'?'$10–$20':b==='20–50'?'$20–$50':b==='20-50'?'$20–$50':'$50+';
+  const priceRanges=['0-10','10-20','20-50','50-999']
+    .map(b=>'<a class="stone-pill" href="/price/'+b+'/"><img src="/assets/img/price/range.svg" alt=""/><div class="text-sm font-semibold">'+label(b)+'</div><div class="ml-auto text-xs text-slate-500">'+(priceCounts[b]||0)+' items</div></a>').join('');
+
+  // Stone tiles
+  const tiles=stones.map(s=>'<a class="stone-pill" href="/stone/'+slug(s)+'/"><img src="/assets/img/stones/_default.svg" alt="" /><div class="flex-1"><div class="text-sm font-semibold">'+s+'</div><div class="text-xs text-slate-500">'+String(counts[s]||0)+' items</div></div></a>').join('');
+
+  // Icons row
   const icons='<div class="flex gap-3 mb-6"><a href="#price" class="stone-pill"><img src="/assets/img/price/range.svg" alt=""/><div><div class="text-sm font-semibold">Browse by Price</div><div class="text-xs text-slate-500">Ranges & Singles</div></div></a><a href="#stone" class="stone-pill"><img src="/assets/img/stones/_default.svg" alt=""/><div><div class="text-sm font-semibold">Browse by Stone</div><div class="text-xs text-slate-500">All stones</div></div></a><a href="#shape" class="stone-pill"><img src="/assets/img/shapes/faceted.svg" alt=""/><div><div class="text-sm font-semibold">Browse by Shape</div><div class="text-xs text-slate-500">Buckets</div></div></a></div>';
+
   return head("Canton Bead Shop – Browse","Shop beads by price, stone, and shape. Build a list and request a quote.", stones)
     + header()
     + '<main><section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">'
@@ -103,10 +120,11 @@ function homePage(stones, counts, items){
     + '<h1 id="price" class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Price</h1><div class="grid-3">'
     + priceSingles +'</div><div class="grid-3 mt-3">'+ priceRanges +'</div>'
     + '<h2 id="stone" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Stone</h2><div class="grid-3">'+ tiles +'</div>'
-    + '<h2 id="shape" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Shape</h2><div class="grid-3">'+ shapeTiles +'</div>'
-    + '</section></main>'
-    + footer();
+    + '<h2 id="shape" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Shape</h2><div class="grid-3">'
+    + buckets.map(b=>'<a class="stone-pill" href="/shape/'+slug(b)+'/"><img src="/assets/img/shapes/'+slug(b)+'.svg" alt=""/><div class="text-sm font-semibold">'+b+'</div><div class="ml-auto text-xs text-slate-500">'+(bucketCounts[b]||0)+' items</div></a>').join('')
+    + '</div></section></main>' + footer();
 }
+
 function tablePage(stones, items){
   return head("All Items – Table View","Browse all items in a compact table.", stones)
     + header()
