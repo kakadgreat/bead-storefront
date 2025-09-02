@@ -1,13 +1,147 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Canton Bead Shop</title>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Canton Bead Shop – Browse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="/assets/css/extra.css"></head>
+<link rel="stylesheet" href="/assets/css/extra.css">
+<style>
+.stone-pill{display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;padding:10px 12px;border-radius:12px;background:#fff}
+.stone-pill img{width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;object-fit:contain}
+.grid-3{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:16px}
+@media(min-width:768px){.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1280px){.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
 <body class="bg-white text-slate-800">
-  <div class="p-10 text-center">
-    <h1 class="text-3xl font-bold mb-4">Canton Bead Shop</h1>
-    <p class="mb-4">Open <code>/dist/index.html</code> for the prebuilt site, or run <code>npm run build</code> to regenerate from your live Google Sheet.</p>
-    <a href="/dist/index.html" class="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg">View Built Site</a>
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold tracking-tight">Canton <span class="text-sky-600">Bead</span> Shop</a>
+    <nav class="hidden md:flex flex-1 items-center mx-6">
+      <a href="/catalog/" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Items (Table)</a>
+      <button id="allStonesBtn" class="ml-auto px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap text-sm">All Stones ▾</button>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a href="/catalog/" class="hidden sm:inline-flex rounded-xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">All Items</a>
+      <button id="printSummaryHeader" class="hidden sm:inline-flex rounded-2xl border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50">Print Summary</button>
+      <a href="/#list" class="relative inline-flex items-center rounded-2xl border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">My List</a>
+    </div>
   </div>
-</body></html>
+</header>
+<div id="megaOverlay" class="mega-overlay"></div>
+<div id="megaPanel" class="mega-panel" tabindex="-1"><div class="mega-inner" id="megaList"></div></div>
+
+<main>
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex gap-3 mb-6">
+    <a href="#price" class="stone-pill"><img src="/assets/img/price/range.svg" alt=""/><div><div class="text-sm font-semibold">Browse by Price</div><div class="text-xs text-slate-500">Ranges & Singles</div></div></a>
+    <a href="#stone" class="stone-pill"><img src="/assets/img/stones/_default.svg" alt=""/><div><div class="text-sm font-semibold">Browse by Stone</div><div class="text-xs text-slate-500">All stones</div></div></a>
+    <a href="#shape" class="stone-pill"><img src="/assets/img/shapes/faceted.svg" alt=""/><div><div class="text-sm font-semibold">Browse by Shape</div><div class="text-xs text-slate-500">Buckets</div></div></a>
+  </div>
+
+  <h1 id="price" class="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Browse by Price</h1>
+  <div id="priceSingles" class="grid-3"></div>
+  <div class="grid-3 mt-3" id="priceRanges"></div>
+
+  <h2 id="stone" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Stone</h2>
+  <div class="grid-3" id="stoneGrid"></div>
+
+  <h2 id="shape" class="text-2xl font-bold tracking-tight mt-8 mb-4">Browse by Shape</h2>
+  <div class="grid-3" id="shapeGrid"></div>
+</section>
+</main>
+
+<footer class="border-t border-slate-200">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-slate-500">© <span id="year"></span> Canton Bead Shop</div>
+</footer>
+
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+
+function slug(s){return String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')}
+function shapeBucket(shape){const s=String(shape||"").toLowerCase(); if(/faceted/.test(s)) return "Faceted"; if(/rondell?e/.test(s)) return "Rondelle"; if(/round(?!ell)/.test(s)) return "Round"; if(/oval|emerald/.test(s)) return "Oval"; if(/drop|brio/.test(s)) return "Drops / Briolettes"; if(/square|rect/.test(s)) return "Square & Rectangle"; if(/coin|disc/.test(s)) return "Coin / Disc"; if(/heart|fancy|carv/.test(s)) return "Heart / Fancy"; if(/nugget|chip|tumble/.test(s)) return "Nugget / Chip / Tumble"; return "Other";}
+function parseMoney(x){if(x==null) return 0; const s=String(x).replace(/\$/g,'').replace(/,/g,'').trim(); const n=parseFloat(s); return isFinite(n)?n:0;}
+
+async function load(){
+  const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7t7O-yUIZNSrglVHnMcRgd2IMAYBQyrdGd6d-JUCoSmxWb5uJNI2G3oKqL8j22BtIBD1yhOXAtsZs/pub?output=csv");
+  const text = await res.text();
+  const rows = text.split(/\r?\n/).filter(Boolean).map(l=>l.split(','));
+  const header = rows.shift();
+  const idx = (name)=> header.findIndex(h=> (h||'').trim().toLowerCase()===name.toLowerCase());
+
+  const iStone=idx('stone'), iShape1=idx('shape 1'), iShape2=idx('shape 2'), iPrice=idx('price');
+  const stones = {}, singles = {}, ranges = {'0-10':0,'10-20':0,'20-50':0,'50-999':0}, buckets={};
+
+  const commonSingles=[5,10,12,15,20,25,30,35,40];
+  commonSingles.forEach(n=>singles[n]=0);
+
+  rows.forEach(r=>{
+    const stone = (r[iStone]||'').trim(); if(!stone) return;
+    const shape = ((r[iShape1]||'') + ' ' + (r[iShape2]||'')).trim();
+    const price = parseMoney(r[iPrice]);
+    stones[stone]=(stones[stone]||0)+1;
+
+    const pRound = Math.round(price*100)/100;
+    if(singles[pRound]!=null) singles[pRound]++;
+    if(price<10) ranges['0-10']++; else if(price<20) ranges['10-20']++; else if(price<50) ranges['20-50']++; else ranges['50-999']++;
+    const b=shapeBucket(shape); buckets[b]=(buckets[b]||0)+1;
+  });
+
+  // render singles
+  const ps = document.getElementById('priceSingles');
+  ps.innerHTML = Object.keys(singles).map(n => `
+    <a class="stone-pill" href="/price/exact/${n}/">
+      <img src="/assets/img/price/exact.svg" alt=""/>
+      <div class="text-sm font-semibold">$${n}</div>
+      <div class="ml-auto text-xs text-slate-500">${singles[n]} items</div>
+    </a>`).join('');
+
+  // render ranges
+  const pr = document.getElementById('priceRanges');
+  const labels = {'0-10':'$0–$10','10-20':'$10–$20','20-50':'$20–$50','50-999':'$50+'};
+  pr.innerHTML = Object.keys(ranges).map(b=>`
+    <a class="stone-pill" href="/price/${b}/">
+      <img src="/assets/img/price/range.svg" alt=""/>
+      <div class="text-sm font-semibold">${labels[b]}</div>
+      <div class="ml-auto text-xs text-slate-500">${ranges[b]} items</div>
+    </a>`).join('');
+
+  // stones
+  const sg = document.getElementById('stoneGrid');
+  const stonesSorted = Object.keys(stones).sort((a,b)=> a.localeCompare(b));
+  sg.innerHTML = stonesSorted.map(s=>`
+    <a class="stone-pill" href="/stone/${slug(s)}/">
+      <img src="/assets/img/stones/_default.svg" alt=""/>
+      <div class="text-sm font-semibold">${s}</div>
+      <div class="ml-auto text-xs text-slate-500">${stones[s]} items</div>
+    </a>`).join('');
+
+  // shapes
+  const bucketsOrder=['Faceted','Rondelle','Round','Oval','Drops / Briolettes','Square & Rectangle','Coin / Disc','Heart / Fancy','Nugget / Chip / Tumble'];
+  const sh = document.getElementById('shapeGrid');
+  sh.innerHTML = bucketsOrder.map(b=>`
+    <a class="stone-pill" href="/shape/${slug(b)}/">
+      <img src="/assets/img/shapes/${slug(b)}.svg" alt=""/>
+      <div class="text-sm font-semibold">${b}</div>
+      <div class="ml-auto text-xs text-slate-500">${buckets[b]||0} items</div>
+    </a>`).join('');
+
+  // All stones mega-menu
+  const btn = document.getElementById("allStonesBtn"), overlay=document.getElementById("megaOverlay"), panel=document.getElementById("megaPanel");
+  if(btn&&overlay&&panel){
+    btn.addEventListener("click",()=>{ overlay.style.display="block"; panel.style.display="block"; panel.focus(); });
+    function close(){ overlay.style.display="none"; panel.style.display="none"; }
+    overlay.addEventListener("click", close);
+    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") close(); });
+    const listEl=document.getElementById("megaList");
+    listEl.innerHTML = stonesSorted.map(s=>`<a href="/stone/${slug(s)}/">${s}</a>`).join("");
+  }
+}
+load();
+</script>
+</body>
+</html>
