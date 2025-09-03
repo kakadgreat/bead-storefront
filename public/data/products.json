@@ -1,0 +1,32 @@
+[
+  {
+    "id": "SKU-001",
+    "code": "CB-001",
+    "name": "Rose Quartz Round",
+    "stone": "Rose Quartz",
+    "shape": "Round",
+    "size": "8mm",
+    "price": 7.5,
+    "image": ""
+  },
+  {
+    "id": "SKU-002",
+    "code": "CB-002",
+    "name": "Amethyst Oval",
+    "stone": "Amethyst",
+    "shape": "Oval",
+    "size": "10x8mm",
+    "price": 9.0,
+    "image": ""
+  },
+  {
+    "id": "SKU-003",
+    "code": "CB-003",
+    "name": "Howlite Rondelle",
+    "stone": "Howlite",
+    "shape": "Rondelle",
+    "size": "6x4mm",
+    "price": 5.25,
+    "image": ""
+  }
+]

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canton Bead Store</title>
+    <!-- (Optional) Tailwind CDN for rapid styling: remove if compiling Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/base.css" />
+  </head>
+  <body class="min-h-screen bg-white text-slate-900">
+    <header class="border-b sticky top-0 bg-white/90 backdrop-blur z-10">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <h1 class="text-xl font-semibold">Canton Bead Store</h1>
+        <button id="cartButton" class="relative rounded-xl px-3 py-1.5 border">
+          Cart <span id="cartCount" class="badge ml-1">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <section>
+        <div class="flex flex-wrap items-end gap-3">
+          <label class="text-sm">Search</label>
+          <input id="q" placeholder="code, name, stone, size..." class="border rounded-lg px-3 py-2 w-80" />
+          <label class="text-sm">Shape</label>
+          <select id="shape" class="border rounded-lg px-2 py-2"></select>
+          <label class="text-sm">Stone</label>
+          <select id="stone" class="border rounded-lg px-2 py-2"></select>
+        </div>
+      </section>
+
+      <section>
+        <table class="table">
+          <thead>
+            <tr class="text-left">
+              <th>SKU</th><th>Name</th><th>Shape</th><th>Size</th><th class="text-right">Price</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="pager" class="mt-4 flex gap-2"></div>
+      </section>
+    </main>
+
+    <!-- Cart Drawer -->
+    <aside id="cartDrawer" class="fixed top-0 right-0 w-[28rem] max-w-[92vw] h-full bg-white border-l shadow-xl translate-x-full transition-transform">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h2 class="text-lg font-semibold">Your Cart</h2>
+        <button id="closeCart" aria-label="Close" class="rounded-lg px-2 py-1 border">✕</button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div id="cartItems" class="space-y-3"></div>
+        <div class="flex items-center justify-between text-lg">
+          <span>Total</span><strong id="cartTotal">$0.00</strong>
+        </div>
+        <button id="checkout" class="w-full rounded-xl px-3 py-3 bg-slate-900 text-white">Checkout</button>
+      </div>
+    </aside>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

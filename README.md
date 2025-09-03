@@ -1,23 +1,47 @@
+# Bead Storefront (Modular Refactor)
 
-# Canton Bead Shop – With Banners & Scraper
+This is a modular refactor scaffold to make the storefront easier to update and extend.
 
-## What’s included
-- Short **stone banners** on `/stone/<stone>/` (about 120px high). Put a hero at `assets/img/stones/<stone-slug>.jpg` to override the default.
-- **All shape pages** generated (both exact-shape and bucket shapes).
-- **Image logic:** If the Google Sheet **Image** column has a URL, it's used; otherwise a **shape placeholder** SVG is shown.
-- **IndiaMART scraper script** (`scripts/fetch-images.mjs`) to generate an **Image** column for your sheet.
+## Goals
 
-## Deploy
-- **Netlify**: Build command `npm run build`, publish `dist`, Node 18.
-- The build pulls your live Google Sheet CSV and generates `/dist` fully.
+- Split runtime code into small, testable ES modules
+- Keep a simple static hosting model (Netlify-ready)
+- Add a light build step for dev ergonomics (Vite)
+- Separate the **data pipeline** (CSV → JSON) from the **UI**
 
-## IndiaMART scraper (local)
-1. Download your live sheet CSV to `data/inventory.csv`.
-2. Run: `node scripts/fetch-images.mjs`
-3. Paste `data/image-column.csv` into your Sheet’s **Image** column (you can start from row 700+ to roll out slowly).
+## Quick start
 
-## Placeholders you can redesign later
-- Shapes: `assets/img/shapes/*.svg` (faceted, rondelle, round, oval, drops-briolettes, square-rectangle, coin-disc, heart-fancy, nugget-chip-tumble, other)
-- Price tiles: `assets/img/price/exact.svg`, `assets/img/price/range.svg`
-- Stone default: `assets/img/stones/_default.svg`
+```sh
+npm install
+# 1) Fetch and convert your Google Sheet CSV → public/data/products.json
+CSV_URL="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" npm run build:data
 
+# 2) Start dev server
+npm run dev
+
+# 3) Production build
+npm run build
+```
+
+## Structure
+
+```
+public/                 # static files served as-is (Netlify publish=dist after build)
+  assets/
+  data/products.json    # generated from your Google Sheet
+src/
+  modules/
+    core/               # storage, format helpers
+    cart/               # cart logic
+    catalog/            # catalog list, filters, paging
+  main.js               # app entrypoint
+scripts/
+  build-data.mjs        # CSV download → JSON normalize (runs before vite build)
+```
+
+## Notes
+
+- The UI uses Tailwind via CDN for speed; you can remove it later and add a Tailwind build if desired.
+- The cart is stored in `localStorage` keyed by `canton_bead_cart_v2`.
+- The pager and filters are generic and can be reused on other pages.
+- Next phases: image gallery, product detail routes, serverless checkout, caching, tests.
